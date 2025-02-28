@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { View, StyleSheet, Alert } from "react-native";
-import { useRouter } from "expo-router";
 import { Text, TextInput, Button } from "react-native-paper";
+import { useRouter } from "expo-router";
 
 export default function SignInScreen() {
   const [email, setEmail] = useState("");
@@ -13,10 +13,15 @@ export default function SignInScreen() {
       Alert.alert("Error", "Please enter both email and password.");
       return;
     }
-    // Simulated authentication (Replace with real API call)
-    if (email === "jehad" && password === "123") {
-      Alert.alert("Success", "Welcome back!");
-      router.push("/"); // Navigate to home after sign-in
+    // Simulated authentication (Replace with real logic)
+    if (email === "admin" && password === "admin123") {
+      Alert.alert("Success", "Welcome Admin!");
+      // Full path navigation to Admin Dashboard
+      router.push('/admin/dashboard');
+    } else if (email === "user" && password === "user123") {
+      Alert.alert("Success", "Welcome User!");
+      // Full path navigation to Customer Home
+      router.push('/customer/home');
     } else {
       Alert.alert("Error", "Invalid credentials!");
     }
@@ -24,9 +29,7 @@ export default function SignInScreen() {
 
   return (
     <View style={styles.container}>
-      <Text variant="headlineMedium" style={styles.title}>
-        Sign In
-      </Text>
+      <Text variant="headlineMedium" style={styles.title}>Sign In</Text>
 
       <TextInput
         label="Email or Username"
@@ -51,7 +54,7 @@ export default function SignInScreen() {
         Sign In
       </Button>
       
-      <Button mode="text" onPress={() => router.push("/sign-up")}>
+      <Button mode="text" onPress={() => router.push("/auth/sign-up")}>
         Don't have an account? Sign Up
       </Button>
     </View>
@@ -63,15 +66,18 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     padding: 20,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "#fff",
   },
   title: {
     textAlign: "center",
     marginBottom: 20,
     fontWeight: "bold",
+    fontSize: 24,
+    color: "#333",
   },
   input: {
     marginBottom: 15,
+    backgroundColor: "#fff",
   },
   button: {
     marginTop: 10,

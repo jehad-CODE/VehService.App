@@ -36,7 +36,7 @@ export default function SignUpScreen() {
       </Text>
 
       <TextInput
-        label="username"
+        label="Username"
         mode="outlined"
         value={username}
         onChangeText={setUsername}

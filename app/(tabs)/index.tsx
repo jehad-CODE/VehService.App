@@ -1,59 +1,93 @@
-import { Image, StyleSheet, Platform, Button, View } from 'react-native';
+import { Image, StyleSheet, TouchableOpacity, View, Text } from 'react-native';
 import { useRouter } from 'expo-router';
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
 
 export default function HomeScreen() {
   const router = useRouter();
 
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome to my Service Vehicle App!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Get Started</ThemedText>
-        <ThemedText>Sign in to book vehicle services and manage your history.</ThemedText>
-      </ThemedView>
-
-      {/* Button to navigate to Sign-In Page */}
-      <View style={styles.buttonContainer}>
-        <Button title="Sign In" onPress={() => router.push('/sign-in')} />
+    <View style={styles.container}>
+      {/* Full-Screen Image Background */}
+      <Image source={require('@/assets/images/veh.service.jpg')} style={styles.image} resizeMode="cover" blurRadius={1} />
+      
+      {/* Overlay Content */}
+      <View style={styles.overlay}>
+        <ThemedText type="title" style={styles.title}>Service Vehicle Booking</ThemedText>
+        <Text style={styles.subtitle}>Book your service in just a few clicks!</Text>
+        
+        <TouchableOpacity style={styles.button} onPress={() => router.push('/auth/sign-in')}>
+          <Text style={styles.buttonText}>Sign In</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.buttonOutline} onPress={() => router.push('/auth/sign-up')}>
+          <Text style={styles.buttonOutlineText}>Sign Up</Text>
+        </TouchableOpacity>
       </View>
-    </ParallaxScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    flex: 1,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
+  image: {
     position: 'absolute',
+    width: '100%',
+    height: '100%',
   },
-  buttonContainer: {
-    marginTop: 20,
+  overlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)', // Lighten overlay for clearer image
     paddingHorizontal: 20,
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#fff',
+    textAlign: 'center',
+    marginBottom: 10,
+    textShadowColor: 'rgba(0, 0, 0, 0.8)',
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 5,
+  },
+  subtitle: {
+    fontSize: 18,
+    color: '#eee',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  button: {
+    backgroundColor: '#007bff',
+    paddingVertical: 14,
+    width: '80%',
+    borderRadius: 30,
+    alignItems: 'center',
+    marginVertical: 10,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  buttonOutline: {
+    borderColor: '#fff',
+    borderWidth: 2,
+    paddingVertical: 14,
+    width: '80%',
+    borderRadius: 30,
+    alignItems: 'center',
+    marginVertical: 10,
+  },
+  buttonOutlineText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
 });
