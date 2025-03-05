@@ -7,20 +7,24 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 export default function AdminHome() {
   const router = useRouter();
 
-  const navigateToManageServices = () => {
+  const navigateToServiceCenters = () => {
     router.push("/admin/ServiceCenters");
   };
 
-  const navigateToManageAppointments = () => {
+  const navigateToAppointments = () => {
     router.push("/admin/appointments");
   };
 
-  const navigateToViewCustomers = () => {
-    router.push("/admin/Billing");
+  const navigateToInventory = () => {
+    router.push("/admin/inventory");
   };
 
-  const navigateToAnalytics = () => {
+  const navigateToTechnicians = () => {
     router.push("/admin/Technicians");
+  };
+
+  const navigateToBilling = () => {
+    router.push("/admin/Billing");
   };
 
   return (
@@ -33,77 +37,86 @@ export default function AdminHome() {
         <Text style={styles.title}>Welcome, Admin!</Text>
 
         <View style={styles.cardContainer}>
-          {/* Manage Services Card */}
+          {/* Service Centers Card */}
           <Card style={styles.card}>
             <View style={styles.cardContent}>
-              <Avatar.Icon size={40} icon="wrench" style={styles.cardIcon} />
+              <Avatar.Icon size={40} icon="office-building" style={styles.cardIcon} />
               <Button
                 mode="contained"
-                onPress={navigateToManageServices}
+                onPress={navigateToServiceCenters}
                 style={styles.cardButton}
                 labelStyle={styles.buttonText}
                 contentStyle={styles.buttonContent}
               >
-                <Text style={styles.buttonText}>Manage</Text>
-                <Text style={styles.buttonText}>Services</Text>
+                <Text style={styles.buttonText}>Service Centers</Text>
               </Button>
             </View>
           </Card>
 
-          {/* Manage Appointments Card */}
+          {/* Appointments Card */}
           <Card style={styles.card}>
             <View style={styles.cardContent}>
               <Avatar.Icon size={40} icon="calendar" style={styles.cardIcon} />
               <Button
                 mode="contained"
-                onPress={navigateToManageAppointments}
+                onPress={navigateToAppointments}
                 style={styles.cardButton}
                 labelStyle={styles.buttonText}
                 contentStyle={styles.buttonContent}
               >
-                <Text style={styles.buttonText}>Manage</Text>
                 <Text style={styles.buttonText}>Appointments</Text>
               </Button>
             </View>
           </Card>
 
-          {/* View Customers Card */}
+          {/* Inventory Card */}
           <Card style={styles.card}>
             <View style={styles.cardContent}>
-              <Avatar.Icon size={40} icon="account-group" style={styles.cardIcon} />
+              <Avatar.Icon size={40} icon="package-variant" style={styles.cardIcon} />
               <Button
                 mode="contained"
-                onPress={navigateToViewCustomers}
+                onPress={navigateToInventory}
                 style={styles.cardButton}
                 labelStyle={styles.buttonText}
                 contentStyle={styles.buttonContent}
               >
-                <Text style={styles.buttonText}>View</Text>
-                <Text style={styles.buttonText}>Customers</Text>
+                <Text style={styles.buttonText}>Inventory</Text>
               </Button>
             </View>
           </Card>
 
-          {/* View Analytics Card */}
+          {/* Technicians Card */}
           <Card style={styles.card}>
             <View style={styles.cardContent}>
-              <Avatar.Icon size={40} icon="chart-line" style={styles.cardIcon} />
+              <Avatar.Icon size={40} icon="account-wrench" style={styles.cardIcon} />
               <Button
                 mode="contained"
-                onPress={navigateToAnalytics}
+                onPress={navigateToTechnicians}
                 style={styles.cardButton}
                 labelStyle={styles.buttonText}
                 contentStyle={styles.buttonContent}
               >
-                <Text style={styles.buttonText}>View</Text>
-                <Text style={styles.buttonText}>Analytics</Text>
+                <Text style={styles.buttonText}>Technicians</Text>
+              </Button>
+            </View>
+          </Card>
+
+          {/* Billing Card */}
+          <Card style={styles.card}>
+            <View style={styles.cardContent}>
+              <Avatar.Icon size={40} icon="cash" style={styles.cardIcon} />
+              <Button
+                mode="contained"
+                onPress={navigateToBilling}
+                style={styles.cardButton}
+                labelStyle={styles.buttonText}
+                contentStyle={styles.buttonContent}
+              >
+                <Text style={styles.buttonText}>Billing</Text>
               </Button>
             </View>
           </Card>
         </View>
-
-        {/* Floating Action Button for Quick Action */}
-        
       </View>
     </ImageBackground>
   );
@@ -125,7 +138,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 20,
-    backgroundColor: "rgba(0, 0, 0, 0.5)", // Dark overlay to improve text visibility
+    backgroundColor: "rgba(0, 0, 0, 0.5)", 
     borderRadius: 15,
     width: "100%",
     paddingBottom: 40,
@@ -143,10 +156,10 @@ const styles = StyleSheet.create({
     paddingBottom: 15,
   },
   card: {
-    width: width * 0.85, // Matching the width of the customer card
+    width: width * 0.85,
     marginVertical: 8,
     padding: 15,
-    backgroundColor: "rgba(255, 255, 255, 0.3)", // Semi-transparent background to see the background image
+    backgroundColor: "rgba(255, 255, 255, 0.3)",
     borderRadius: 12,
     elevation: 4,
     alignItems: "center",
@@ -162,35 +175,25 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   cardIcon: {
-    backgroundColor: "#1E88E5", // Blue background for icons
+    backgroundColor: "#1E88E5",
     marginRight: 15,
     padding: 8,
     borderRadius: 20,
   },
   cardButton: {
-    width: "45%", // Match the button size to the customer button
+    width: "45%", 
     paddingVertical: 10,
     borderRadius: 18,
-    backgroundColor: "#1E88E5", // Blue button
+    backgroundColor: "#1E88E5",
   },
   buttonText: {
-    fontSize: 16, // Adjusted for consistency with customer button
+    fontSize: 10,
     fontWeight: "bold",
     textAlign: "center",
-    lineHeight: 20, // Adjust line height for better spacing between words
+    lineHeight: 20,
   },
   buttonContent: {
-    justifyContent: "center", // Centers the text inside the button
-    flexDirection: "column", // Stack text vertically
-  },
-  floatingButton: {
-    position: "absolute",
-    bottom: 20,
-    right: 20,
-    backgroundColor: "#FF4081", // Floating button pink color
-    borderRadius: 50,
-    paddingVertical: 15,
-    paddingHorizontal: 25,
-    elevation: 6,
+    justifyContent: "center",
+    flexDirection: "column",
   },
 });
