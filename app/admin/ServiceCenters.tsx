@@ -1,10 +1,10 @@
 import React from "react";
 import { View, Text } from "react-native";
 
-export default function Inventory() {
+export default function ServiceCenters() {
   return (
     <View>
-      <Text>Inventory Tracking</Text>
+      <Text>Service Centers Management</Text>
     </View>
   );
 }

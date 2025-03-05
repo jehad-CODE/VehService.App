@@ -37,7 +37,7 @@ export default function UserHome() {
           {/* Book a Service Card */}
           <Card style={styles.card}>
             <View style={styles.cardContent}>
-              <Avatar.Icon size={50} icon="car" style={styles.cardIcon} />
+              <Avatar.Icon size={40} icon="car" style={styles.cardIcon} />
               <Button
                 mode="contained"
                 onPress={navigateToBooking}
@@ -53,7 +53,7 @@ export default function UserHome() {
           {/* Vehicle History Card */}
           <Card style={styles.card}>
             <View style={styles.cardContent}>
-              <Avatar.Icon size={50} icon="history" style={styles.cardIcon} />
+              <Avatar.Icon size={40} icon="history" style={styles.cardIcon} />
               <Button
                 mode="contained"
                 onPress={navigateToVehicleHistory}
@@ -69,7 +69,7 @@ export default function UserHome() {
           {/* Get Cost Estimates Card */}
           <Card style={styles.card}>
             <View style={styles.cardContent}>
-              <Avatar.Icon size={50} icon="calculator" style={styles.cardIcon} />
+              <Avatar.Icon size={40} icon="calculator" style={styles.cardIcon} />
               <Button
                 mode="contained"
                 onPress={navigateToCostEstimates}
@@ -85,7 +85,7 @@ export default function UserHome() {
           {/* Track Services Card */}
           <Card style={styles.card}>
             <View style={styles.cardContent}>
-              <Avatar.Icon size={50} icon="map-marker" style={styles.cardIcon} />
+              <Avatar.Icon size={40} icon="map-marker" style={styles.cardIcon} />
               <Button
                 mode="contained"
                 onPress={navigateToServiceTracking}
@@ -100,20 +100,13 @@ export default function UserHome() {
         </View>
 
         {/* Floating Action Button for Quick Action */}
-        <Button
-          mode="contained"
-          style={styles.floatingButton}
-          onPress={navigateToBooking}
-          icon="plus"
-        >
-          New Service
-        </Button>
+       
       </View>
     </ImageBackground>
   );
 }
 
-const { width, height } = Dimensions.get("window");
+const { width } = Dimensions.get("window");
 
 const styles = StyleSheet.create({
   backgroundImage: {
@@ -135,55 +128,52 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   title: {
-    fontSize: 32,
+    fontSize: 24,
     fontWeight: "bold",
     color: "#fff",
-    marginBottom: 20,
+    marginBottom: 15,
     textAlign: "center",
   },
   cardContainer: {
     flexDirection: "column",
     width: "100%",
-    paddingBottom: 20,
+    paddingBottom: 15,
   },
   card: {
-    width: width * 0.9, // Make each card responsive based on screen width
-    marginVertical: 10,
-    padding: 20,
+    width: width * 0.85, // Matching the width of the admin card
+    marginVertical: 8,
+    padding: 15,
     backgroundColor: "rgba(255, 255, 255, 0.3)", // Semi-transparent background to see the background image
-    borderRadius: 15,
-    elevation: 5,
+    borderRadius: 12,
+    elevation: 4,
     alignItems: "center",
-    shadowColor: "#000", // Black shadow for the card
-    shadowOpacity: 0.3,
-    shadowRadius: 20,
-    shadowOffset: { width: 0, height: 10 },
+    shadowColor: "#000",
+    shadowOpacity: 0.25,
+    shadowRadius: 15,
+    shadowOffset: { width: 0, height: 8 },
   },
   cardContent: {
-    overflow: "hidden", // Move the overflow style here to fix the issue
-  alignItems: "center",
-  justifyContent: "space-evenly", // Corrected: Single justification for layout
-  flexDirection: "row", // Align icon and button side by side
-  width: "100%", // Ensures full width for the container
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    width: "100%",
   },
   cardIcon: {
     backgroundColor: "#1E88E5", // Blue background for icons
-    marginRight: 20,
-    padding: 10,
-    borderRadius: 25,
+    marginRight: 15,
+    padding: 8,
+    borderRadius: 20,
   },
   cardButton: {
-    width: "50%", // Makes the button smaller
-    paddingVertical: 12, // Reduced padding for a smaller button
-    borderRadius: 20,
+    width: "45%", // Match the button size to the admin's button
+    paddingVertical: 10,
+    borderRadius: 18,
     backgroundColor: "#1E88E5", // Blue button
-    marginTop: 10,
   },
   buttonText: {
-    fontSize: 16, // Reduced font size for smaller button text
+    fontSize: 12, // Adjusted for consistency with admin button
     fontWeight: "bold",
     textAlign: "center",
-    paddingVertical: 5, // Adjust padding for smaller text
   },
   buttonContent: {
     justifyContent: "center", // Centers the text inside the button

@@ -14,11 +14,11 @@ export default function SignInScreen() {
       return;
     }
     // Simulated authentication (Replace with real logic)
-    if (email === "admin" && password === "admin123") {
+    if (email === "admin" && password === "123") {
       Alert.alert("Success", "Welcome Admin!");
       // Full path navigation to Admin Dashboard
       router.push('/admin/dashboard');
-    } else if (email === "user" && password === "user123") {
+    } else if (email === "user" && password === "123") {
       Alert.alert("Success", "Welcome User!");
       // Full path navigation to Customer Home
       router.push('/customer/home');

@@ -1,10 +1,10 @@
 import React from "react";
 import { View, Text } from "react-native";
 
-export default function Inventory() {
+export default function Billing() {
   return (
     <View>
-      <Text>Inventory Tracking</Text>
+      <Text>Billing Management</Text>
     </View>
   );
 }
