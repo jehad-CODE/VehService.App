@@ -1,18 +1,49 @@
 import React from "react";
-import { View, StyleSheet, Text } from "react-native";
-import { Button, Card } from "react-native-paper";
+import { View, StyleSheet, FlatList } from "react-native";
+import { Button, Card, Text, IconButton } from "react-native-paper";
 
-export default function Inventory() {
+const inventoryItems = [
+  { id: "1", name: "Oil Filter", quantity: 20 },
+  { id: "2", name: "Brake Pads", quantity: 15 },
+  { id: "3", name: "Engine Coolant", quantity: 10 },
+];
+
+export default function InventoryScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Inventory</Text>
-      <Card style={styles.card}>
-        <Card.Content>
-          <Text>Item 1</Text>
-          <Text>Item 2</Text>
-        </Card.Content>
-      </Card>
-      <Button mode="contained" style={styles.button}>
+      <Text style={styles.title}>Inventory Management</Text>
+
+      <FlatList
+        data={inventoryItems}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <Card style={styles.card}>
+            <Card.Content>
+              <Text style={styles.itemName}>{item.name}</Text>
+              <Text style={styles.itemDetails}>Quantity: {item.quantity}</Text>
+            </Card.Content>
+            <Card.Actions>
+              <IconButton
+                icon="pencil"
+                size={20}
+                onPress={() => console.log("Edit Item", item.id)}
+              />
+              <IconButton
+                icon="delete"
+                size={20}
+                onPress={() => console.log("Delete Item", item.id)}
+              />
+            </Card.Actions>
+          </Card>
+        )}
+      />
+
+      <Button
+        mode="contained"
+        style={styles.button}
+        labelStyle={styles.buttonLabel}
+        onPress={() => console.log("Add New Item")}
+      >
         Add Item
       </Button>
     </View>
@@ -22,17 +53,41 @@ export default function Inventory() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    padding: 16,
+    backgroundColor: "#f7f7f7",
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: "bold",
     marginBottom: 20,
+    color: "#333",
+    textAlign: "center",
   },
   card: {
-    marginBottom: 20,
+    marginBottom: 16,
+    borderRadius: 8,
+    elevation: 3,
+    backgroundColor: "#fff",
+    padding: 10,
+  },
+  itemName: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#333",
+  },
+  itemDetails: {
+    fontSize: 14,
+    color: "#666",
+    marginTop: 4,
   },
   button: {
-    marginTop: 10,
+    marginTop: 20,
+    borderRadius: 8,
+    backgroundColor: "#6200ee",
+    paddingVertical: 8,
+  },
+  buttonLabel: {
+    color: "#fff",
+    fontWeight: "bold",
   },
 });

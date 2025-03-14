@@ -2,15 +2,19 @@ import { useState } from "react";
 import { View, StyleSheet, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { Text, TextInput, Button } from "react-native-paper";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import API from "../services/api"; // Import the API instance
+import axios from "axios";
 
 export default function SignUpScreen() {
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleSignUp = () => {
+  const handleSignUp = async () => {
     if (!email || !username || !password || !confirmPassword) {
       Alert.alert("Error", "All fields are required!");
       return;
@@ -24,9 +28,30 @@ export default function SignUpScreen() {
       return;
     }
 
-    // Simulated sign-up (Replace with real API call)
-    Alert.alert("Success", "Account created successfully!");
-    router.push("/sign-in"); // Redirect to Sign-In
+    setLoading(true); // Start loading
+    try {
+      // Make API call to register user
+      const response = await API.post("/auth/sign-up", {
+        username,
+        email,
+        password,
+      });
+
+      // If registration is successful
+      Alert.alert("Success", "Account created successfully!");
+      router.push("/auth/sign-in"); // Redirect to Sign-In
+    } catch (error) {
+      console.error("Sign-up error:", error); // Log the full error object
+      if (axios.isAxiosError(error)) {
+        // Axios-specific error
+        Alert.alert("Error", error.response?.data.message || "Registration failed.");
+      } else {
+        // Generic error
+        Alert.alert("Error", "An unexpected error occurred.");
+      }
+    } finally {
+      setLoading(false); // Stop loading
+    }
   };
 
   return (
@@ -72,11 +97,16 @@ export default function SignUpScreen() {
         style={styles.input}
       />
 
-      <Button mode="contained" onPress={handleSignUp} style={styles.button}>
-        Sign Up
+      <Button
+        mode="contained"
+        onPress={handleSignUp}
+        style={styles.button}
+        disabled={loading} // Disable button during loading
+      >
+        {loading ? "Signing Up..." : "Sign Up"}
       </Button>
 
-      <Button mode="text" onPress={() => router.push("/sign-in")}>
+      <Button mode="text" onPress={() => router.push("/auth/sign-in")}>
         Already have an account? Sign In
       </Button>
     </View>

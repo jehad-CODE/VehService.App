@@ -29,7 +29,7 @@ export default function AdminHome() {
 
   return (
     <ImageBackground
-      source={require("@/assets/images/admin-dashboard.jpg")} // Ensure correct path to your image
+      source={require("@/assets/images/admin-dashboard.jpg")}
       style={styles.backgroundImage}
       resizeMode="cover"
     >
