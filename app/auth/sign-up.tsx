@@ -1,9 +1,7 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { View, StyleSheet, Alert } from "react-native";
-import { useRouter } from "expo-router";
 import { Text, TextInput, Button } from "react-native-paper";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import API from "../services/api"; // Import the API instance
+import { useRouter } from "expo-router";
 import axios from "axios";
 
 export default function SignUpScreen() {
@@ -15,6 +13,7 @@ export default function SignUpScreen() {
   const router = useRouter();
 
   const handleSignUp = async () => {
+    // Basic validation
     if (!email || !username || !password || !confirmPassword) {
       Alert.alert("Error", "All fields are required!");
       return;
@@ -30,18 +29,27 @@ export default function SignUpScreen() {
 
     setLoading(true); // Start loading
     try {
+      console.log("Sending data to API:", { username, email, password });
+
       // Make API call to register user
-      const response = await API.post("/auth/sign-up", {
+      const response = await axios.post("http://192.168.0.103:5000/api/auth/signup", {
         username,
         email,
         password,
+        confirmPassword,
       });
 
-      // If registration is successful
-      Alert.alert("Success", "Account created successfully!");
-      router.push("/auth/sign-in"); // Redirect to Sign-In
+      console.log("Response from API:", response.data);  // Log the response
+
+      if (response.data.message === "User created successfully") {
+        // If registration is successful
+        Alert.alert("Success", "Account created successfully!");
+        router.push("/auth/sign-in"); // Redirect to Sign-In
+      } else {
+        Alert.alert("Error", response.data.message || "Registration failed.");
+      }
     } catch (error) {
-      console.error("Sign-up error:", error); // Log the full error object
+      console.error("Sign-up error:", error);
       if (axios.isAxiosError(error)) {
         // Axios-specific error
         Alert.alert("Error", error.response?.data.message || "Registration failed.");
@@ -118,15 +126,18 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     padding: 20,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "#fff",
   },
   title: {
     textAlign: "center",
     marginBottom: 20,
     fontWeight: "bold",
+    fontSize: 24,
+    color: "#333",
   },
   input: {
     marginBottom: 15,
+    backgroundColor: "#fff",
   },
   button: {
     marginTop: 10,

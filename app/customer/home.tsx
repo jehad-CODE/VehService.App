@@ -2,31 +2,14 @@ import React from "react";
 import { View, StyleSheet, Text, ImageBackground, Dimensions } from "react-native";
 import { Button, Card, Avatar } from "react-native-paper";
 import { useRouter } from "expo-router";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 export default function UserHome() {
   const router = useRouter();
-  const user = { name: " jehad" };
-
-  const navigateToBooking = () => {
-    router.push("/customer/booking");
-  };
-
-  const navigateToVehicleHistory = () => {
-    router.push("/customer/vehicle-history");
-  };
-
-  const navigateToCostEstimates = () => {
-    router.push("/customer/cost-estimates");
-  };
-
-  const navigateToServiceTracking = () => {
-    router.push("/customer/service-tracking");
-  };
+  const user = { name: "Jehad" };
 
   return (
     <ImageBackground
-      source={require("@/assets/images/customer-home.jpg")} // Ensure correct path to your image
+      source={require("@/assets/images/customer-home.jpg")}
       style={styles.backgroundImage}
       resizeMode="cover"
     >
@@ -40,7 +23,7 @@ export default function UserHome() {
               <Avatar.Icon size={40} icon="car" style={styles.cardIcon} />
               <Button
                 mode="contained"
-                onPress={navigateToBooking}
+                onPress={() => router.push("/customer/booking")}
                 style={styles.cardButton}
                 labelStyle={styles.buttonText}
                 contentStyle={styles.buttonContent}
@@ -56,28 +39,12 @@ export default function UserHome() {
               <Avatar.Icon size={40} icon="history" style={styles.cardIcon} />
               <Button
                 mode="contained"
-                onPress={navigateToVehicleHistory}
+                onPress={() => router.push("/customer/vehicle-history")}
                 style={styles.cardButton}
                 labelStyle={styles.buttonText}
                 contentStyle={styles.buttonContent}
               >
                 View History
-              </Button>
-            </View>
-          </Card>
-
-          {/* Get Cost Estimates Card */}
-          <Card style={styles.card}>
-            <View style={styles.cardContent}>
-              <Avatar.Icon size={40} icon="calculator" style={styles.cardIcon} />
-              <Button
-                mode="contained"
-                onPress={navigateToCostEstimates}
-                style={styles.cardButton}
-                labelStyle={styles.buttonText}
-                contentStyle={styles.buttonContent}
-              >
-                Get Estimate
               </Button>
             </View>
           </Card>
@@ -88,7 +55,7 @@ export default function UserHome() {
               <Avatar.Icon size={40} icon="map-marker" style={styles.cardIcon} />
               <Button
                 mode="contained"
-                onPress={navigateToServiceTracking}
+                onPress={() => router.push("/customer/service-tracking")}
                 style={styles.cardButton}
                 labelStyle={styles.buttonText}
                 contentStyle={styles.buttonContent}
@@ -97,10 +64,23 @@ export default function UserHome() {
               </Button>
             </View>
           </Card>
-        </View>
+          {/* Profile Card */}
+          <Card style={styles.card}>
+            <View style={styles.cardContent}>
+              <Avatar.Icon size={40} icon="account" style={styles.cardIcon} />
+              <Button
+                mode="contained"
+                onPress={() => router.push("/customer/CustomerProfile")}
+                style={styles.cardButton}
+                labelStyle={styles.buttonText}
+                contentStyle={styles.buttonContent}
+              >
+                My Profile
+              </Button>
+            </View>
+          </Card>
 
-        {/* Floating Action Button for Quick Action */}
-       
+        </View>
       </View>
     </ImageBackground>
   );
@@ -122,7 +102,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 20,
-    backgroundColor: "rgba(0, 0, 0, 0.5)", // Dark overlay to improve text visibility
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
     borderRadius: 15,
     width: "100%",
     paddingBottom: 40,
@@ -140,10 +120,10 @@ const styles = StyleSheet.create({
     paddingBottom: 15,
   },
   card: {
-    width: width * 0.85, // Matching the width of the admin card
+    width: width * 0.85,
     marginVertical: 8,
     padding: 15,
-    backgroundColor: "rgba(255, 255, 255, 0.3)", // Semi-transparent background to see the background image
+    backgroundColor: "rgba(255, 255, 255, 0.3)",
     borderRadius: 12,
     elevation: 4,
     alignItems: "center",
@@ -159,33 +139,23 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   cardIcon: {
-    backgroundColor: "#1E88E5", // Blue background for icons
+    backgroundColor: "#1E88E5",
     marginRight: 15,
     padding: 8,
     borderRadius: 20,
   },
   cardButton: {
-    width: "45%", // Match the button size to the admin's button
+    width: "45%",
     paddingVertical: 10,
     borderRadius: 18,
-    backgroundColor: "#1E88E5", // Blue button
+    backgroundColor: "#1E88E5",
   },
   buttonText: {
-    fontSize: 12, // Adjusted for consistency with admin button
+    fontSize: 12,
     fontWeight: "bold",
     textAlign: "center",
   },
   buttonContent: {
-    justifyContent: "center", // Centers the text inside the button
-  },
-  floatingButton: {
-    position: "absolute",
-    bottom: 20,
-    right: 20,
-    backgroundColor: "#FF4081", // Floating button pink color
-    borderRadius: 50,
-    paddingVertical: 15,
-    paddingHorizontal: 25,
-    elevation: 6,
+    justifyContent: "center",
   },
 });
