@@ -1,11 +1,16 @@
 import React from "react";
-import { View, StyleSheet, Text, ImageBackground, Dimensions } from "react-native";
+import { View, StyleSheet, Text, ImageBackground, Dimensions, ScrollView } from "react-native";
 import { Button, Card, Avatar } from "react-native-paper";
 import { useRouter } from "expo-router";
 
 export default function UserHome() {
   const router = useRouter();
   const user = { name: "Jehad" };
+
+  const signOut = () => {
+    // Sign-out logic here (clear tokens, redirect to login screen)
+    router.push("/(tabs)"); // Redirect to tabs (assuming this takes the user to login screen or dashboard)
+  };
 
   return (
     <ImageBackground
@@ -14,73 +19,85 @@ export default function UserHome() {
       resizeMode="cover"
     >
       <View style={styles.container}>
-        <Text style={styles.title}>Welcome, {user.name}!</Text>
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
+          <Text style={styles.title}>Welcome, {user.name}!</Text>
 
-        <View style={styles.cardContainer}>
-          {/* Book a Service Card */}
-          <Card style={styles.card}>
-            <View style={styles.cardContent}>
-              <Avatar.Icon size={40} icon="car" style={styles.cardIcon} />
-              <Button
-                mode="contained"
-                onPress={() => router.push("/customer/booking")}
-                style={styles.cardButton}
-                labelStyle={styles.buttonText}
-                contentStyle={styles.buttonContent}
-              >
-                Book Now
-              </Button>
-            </View>
-          </Card>
+          <View style={styles.cardContainer}>
+            {/* Book a Service Card */}
+            <Card style={styles.card}>
+              <View style={styles.cardContent}>
+                <Avatar.Icon size={40} icon="car" style={styles.cardIcon} />
+                <Button
+                  mode="contained"
+                  onPress={() => router.push("/customer/booking")}
+                  style={styles.cardButton}
+                  labelStyle={styles.buttonText}
+                  contentStyle={styles.buttonContent}
+                >
+                  Book Now
+                </Button>
+              </View>
+            </Card>
 
-          {/* Vehicle History Card */}
-          <Card style={styles.card}>
-            <View style={styles.cardContent}>
-              <Avatar.Icon size={40} icon="history" style={styles.cardIcon} />
-              <Button
-                mode="contained"
-                onPress={() => router.push("/customer/vehicle-history")}
-                style={styles.cardButton}
-                labelStyle={styles.buttonText}
-                contentStyle={styles.buttonContent}
-              >
-                View History
-              </Button>
-            </View>
-          </Card>
+            {/* Vehicle History Card */}
+            <Card style={styles.card}>
+              <View style={styles.cardContent}>
+                <Avatar.Icon size={40} icon="history" style={styles.cardIcon} />
+                <Button
+                  mode="contained"
+                  onPress={() => router.push("/customer/vehicle-history")}
+                  style={styles.cardButton}
+                  labelStyle={styles.buttonText}
+                  contentStyle={styles.buttonContent}
+                >
+                  View History
+                </Button>
+              </View>
+            </Card>
 
-          {/* Track Services Card */}
-          <Card style={styles.card}>
-            <View style={styles.cardContent}>
-              <Avatar.Icon size={40} icon="map-marker" style={styles.cardIcon} />
-              <Button
-                mode="contained"
-                onPress={() => router.push("/customer/service-tracking")}
-                style={styles.cardButton}
-                labelStyle={styles.buttonText}
-                contentStyle={styles.buttonContent}
-              >
-                Track Service
-              </Button>
-            </View>
-          </Card>
-          {/* Profile Card */}
-          <Card style={styles.card}>
-            <View style={styles.cardContent}>
-              <Avatar.Icon size={40} icon="account" style={styles.cardIcon} />
-              <Button
-                mode="contained"
-                onPress={() => router.push("/customer/CustomerProfile")}
-                style={styles.cardButton}
-                labelStyle={styles.buttonText}
-                contentStyle={styles.buttonContent}
-              >
-                My Profile
-              </Button>
-            </View>
-          </Card>
+            {/* Track Services Card */}
+            <Card style={styles.card}>
+              <View style={styles.cardContent}>
+                <Avatar.Icon size={40} icon="map-marker" style={styles.cardIcon} />
+                <Button
+                  mode="contained"
+                  onPress={() => router.push("/customer/service-tracking")}
+                  style={styles.cardButton}
+                  labelStyle={styles.buttonText}
+                  contentStyle={styles.buttonContent}
+                >
+                  Track Service
+                </Button>
+              </View>
+            </Card>
 
-        </View>
+            {/* Profile Card */}
+            <Card style={styles.card}>
+              <View style={styles.cardContent}>
+                <Avatar.Icon size={40} icon="account" style={styles.cardIcon} />
+                <Button
+                  mode="contained"
+                  onPress={() => router.push("/customer/CustomerProfile")}
+                  style={styles.cardButton}
+                  labelStyle={styles.buttonText}
+                  contentStyle={styles.buttonContent}
+                >
+                  My Profile
+                </Button>
+              </View>
+            </Card>
+          </View>
+        </ScrollView>
+
+        {/* Sign-out Button */}
+        <Button
+          mode="contained"
+          onPress={signOut}
+          style={styles.signOutButton}
+          labelStyle={styles.buttonText}
+        >
+          Sign Out
+        </Button>
       </View>
     </ImageBackground>
   );
@@ -101,10 +118,16 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 20,
+    paddingHorizontal: 25,
     backgroundColor: "rgba(0, 0, 0, 0.5)",
     borderRadius: 15,
     width: "100%",
+    paddingBottom: 40,
+  },
+  scrollContainer: {
+    flexGrow: 1,
+    justifyContent: "center",
+    alignItems: "center",
     paddingBottom: 40,
   },
   title: {
@@ -113,6 +136,13 @@ const styles = StyleSheet.create({
     color: "#fff",
     marginBottom: 15,
     textAlign: "center",
+  },
+  signOutButton: {
+    width: "50%",
+    paddingVertical: 10,
+    borderRadius: 18,
+    backgroundColor: "#D32F2F",
+    marginTop: 20, // Space between the cards and the sign-out button
   },
   cardContainer: {
     flexDirection: "column",

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import {View, StyleSheet,ScrollView,Platform,KeyboardAvoidingView,} from "react-native";
-import {Button,TextInput,Text,Card,Menu,Provider,} from "react-native-paper";
+import { View, StyleSheet, ScrollView, Platform, KeyboardAvoidingView } from "react-native";
+import { Button, TextInput, Text, Card, Menu, Provider } from "react-native-paper";
 import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 
 export default function CustomerBookingPage() {
@@ -57,7 +57,7 @@ export default function CustomerBookingPage() {
   return (
     <Provider>
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}//for scrolldown and does not hide the comp
+        behavior={Platform.OS === "ios" ? "padding" : "height"} // For scrolldown and does not hide the comp
         style={styles.flex}
       >
         <ScrollView contentContainerStyle={styles.container}>

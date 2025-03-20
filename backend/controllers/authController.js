@@ -1,46 +1,59 @@
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+// controllers/authController.js
 const User = require('../models/User');
+const jwt = require('jsonwebtoken');
 
-// Sign Up Controller
+// Sign-up controller
 const signUp = async (req, res) => {
-  const { email, username, password, confirmPassword } = req.body;
-
-  // Check if passwords match
-  if (password !== confirmPassword) {
-    return res.status(400).json({ message: 'Passwords do not match.' });
-  }
+  const { username, email, password, role } = req.body;
 
   try {
-    // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ message: 'Email already exists.' });
+      return res.status(400).json({ message: 'Email already registered' });
     }
 
-    // Hash the password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Create new user, default role 'customer'
     const newUser = new User({
-      email,
       username,
-      password: hashedPassword,
-      role: 'customer', // Default to 'customer' role
+      email,
+      password,  // Store password as plain text
+      role: role || 'customer',  // Default role is 'customer'
     });
 
-    // Save new user to the database
     await newUser.save();
-
-    // Create a JWT token
-    const token = jwt.sign({ id: newUser._id, role: newUser.role }, process.env.JWT_SECRET, {
-      expiresIn: '1h',
-    });
-
-    // Return success message with token
-    res.status(201).json({ message: 'User created successfully', token });
+    res.status(201).json({ message: 'User registered successfully' });
   } catch (error) {
-    console.error(error);
+    console.error('Sign-up error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+// Sign-in controller
+const signIn = async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid email or password' });
+    }
+
+    // Password comparison (plain text)
+    if (user.password !== password) {
+      return res.status(400).json({ message: 'Invalid email or password' });
+    }
+
+    // Generate JWT token
+    const token = jwt.sign(
+      { userId: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    res.json({ token, role: user.role });
+  } catch (error) {
+    console.error('Sign-in error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+module.exports = { signUp, signIn };

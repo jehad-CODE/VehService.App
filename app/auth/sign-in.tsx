@@ -1,11 +1,18 @@
-// File: sign-in.tsx
-
 import React, { useState } from 'react';
-import { View, StyleSheet, Alert } from 'react-native';
-import { Text, TextInput, Button } from 'react-native-paper';
+import { View, StyleSheet, ImageBackground, Alert, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { Text, TextInput, Button, DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+
+const theme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    primary: '#007bff',
+    outline: 'black',
+  },
+};
 
 export default function SignInScreen() {
   const [email, setEmail] = useState('');
@@ -19,106 +26,136 @@ export default function SignInScreen() {
       return;
     }
 
-    setLoading(true); // Start loading
+    setLoading(true);
     try {
-      // Make API call to sign in user
       const response = await axios.post('http://192.168.0.103:5000/api/auth/signin', {
         email,
         password,
       });
 
-      // Save the JWT token to AsyncStorage
       await AsyncStorage.setItem('token', response.data.token);
+      const userRole = response.data.role;
 
-      // Redirect based on user role (admin or customer)
-      const userEmail = response.data.email; // Get the email from the response
-      const userRole = response.data.role; // Get the role from the response
-      
-      // Check if the email is "jehad@gmail.com" and the role is "admin"
-      if (userEmail === 'jehad@gmail.com' && userRole === 'admin') {
-        router.push('/admin/dashboard'); // Redirect to admin dashboard
+      if (userRole === 'admin') {
+        router.push('/admin/dashboard');
       } else if (userRole === 'customer') {
-        router.push('/customer/home'); // Redirect to customer home
+        router.push('/customer/home');
       } else {
-        Alert.alert('Error', 'Invalid user role or email.');
+        Alert.alert('Error', 'Invalid user role.');
       }
-      
+
       Alert.alert('Success', 'Sign-in successful!');
     } catch (error) {
       console.error('Sign-in error:', error);
-      if (axios.isAxiosError(error)) {
-        // Axios-specific error
-        Alert.alert('Error', error.response?.data.message || 'Invalid credentials.');
-      } else {
-        // Generic error
-        Alert.alert('Error', 'An unexpected error occurred.');
-      }
+      const errorMessage = axios.isAxiosError(error)
+        ? error.response?.data.message || 'Invalid credentials.'
+        : 'An unexpected error occurred.';
+      Alert.alert('Error', errorMessage);
     } finally {
-      setLoading(false); // Stop loading
+      setLoading(false);
     }
   };
 
   return (
-    <View style={styles.container}>
-      <Text variant="headlineMedium" style={styles.title}>
-        Sign In
-      </Text>
+    <PaperProvider theme={theme}>
+      <ImageBackground source={require('@/assets/images/login.jpg')} style={styles.background}>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
+          <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
+            <View style={styles.innerContainer}>
+              <Text style={styles.title}>Sign In</Text>
 
-      <TextInput
-        label="Email or Username"
-        mode="outlined"
-        value={email}
-        onChangeText={setEmail}
-        autoCapitalize="none"
-        keyboardType="email-address"
-        style={styles.input}
-      />
+              <TextInput
+                label="Email"
+                mode="outlined"
+                value={email}
+                onChangeText={setEmail}
+                autoCapitalize="none"
+                keyboardType="email-address"
+                style={styles.input}
+                theme={theme}
+              />
 
-      <TextInput
-        label="Password"
-        mode="outlined"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry={false} // Show password
-        style={styles.input}
-      />
+              <TextInput
+                label="Password"
+                mode="outlined"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={true}
+                style={styles.input}
+                theme={theme}
+              />
 
-      <Button
-        mode="contained"
-        onPress={handleSignIn}
-        style={styles.button}
-        disabled={loading} // Disable button during loading
-      >
-        {loading ? 'Signing In...' : 'Sign In'}
-      </Button>
+              <Button
+                mode="contained"
+                onPress={handleSignIn}
+                style={styles.button}
+                contentStyle={styles.buttonContent}
+                disabled={loading}
+              >
+                {loading ? 'Signing In...' : 'Sign In'}
+              </Button>
 
-      <Button mode="text" onPress={() => router.push('/auth/sign-up')}>
-        Don't have an account? Sign Up
-      </Button>
-    </View>
+              <Button mode="text" onPress={() => router.push('/auth/sign-up')} style={styles.signUpButton}>
+                Don't have an account? <Text style={styles.signUpText}>Sign Up</Text>
+              </Button>
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </ImageBackground>
+    </PaperProvider>
   );
 }
 
 const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+    resizeMode: 'cover',
+    opacity: 0.9, // Reduce opacity to make it slightly smaller
+  },
   container: {
     flex: 1,
     justifyContent: 'center',
+  },
+  scrollContainer: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+  },
+  innerContainer: {
+    backgroundColor: 'rgba(255, 255, 255, 0.6)', // More transparent background
+    borderRadius: 12,
     padding: 20,
-    backgroundColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 5,
   },
   title: {
     textAlign: 'center',
     marginBottom: 20,
     fontWeight: 'bold',
-    fontSize: 24,
-    color: '#333',
+    fontSize: 26,
+    color: '#007bff',
   },
   input: {
     marginBottom: 15,
-    backgroundColor: '#fff',
+    backgroundColor: 'rgba(255, 255, 255, 0.8)', // Slightly transparent input
   },
   button: {
     marginTop: 10,
-    padding: 5,
+    backgroundColor: '#007bff',
+    borderRadius: 8,
+  },
+  buttonContent: {
+    paddingVertical: 10,
+  },
+  signUpButton: {
+    marginTop: 10,
+    alignSelf: 'center',
+  },
+  signUpText: {
+    color: '#007bff',
+    fontWeight: 'bold',
   },
 });

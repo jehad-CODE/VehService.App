@@ -1,12 +1,20 @@
 import React from "react";
-import { View, StyleSheet, Text, ImageBackground, Dimensions } from "react-native";
+import { View, StyleSheet, Text, ImageBackground, Dimensions, ScrollView } from "react-native";
 import { Button, Card, Avatar } from "react-native-paper";
 import { useRouter } from "expo-router";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+
+const { width, height } = Dimensions.get("window");
 
 export default function AdminHome() {
   const router = useRouter();
 
+  // Sign-out function
+  const signOut = () => {
+    // Sign-out logic here (clear tokens, redirect to login screen)
+    router.push("/(tabs)"); // Redirect to tabs
+  };
+
+  // Navigate to other sections
   const navigateToServiceCenters = () => {
     router.push("/admin/ServiceCenters");
   };
@@ -33,7 +41,7 @@ export default function AdminHome() {
       style={styles.backgroundImage}
       resizeMode="cover"
     >
-      <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.title}>Welcome, Admin!</Text>
 
         <View style={styles.cardContainer}>
@@ -117,12 +125,21 @@ export default function AdminHome() {
             </View>
           </Card>
         </View>
+      </ScrollView>
+
+      {/* Sign Out Button */}
+      <View style={styles.fixedBottomContainer}>
+        <Button
+          mode="contained"
+          onPress={signOut}
+          style={styles.signOutButton} // Apply red button style
+        >
+          Sign Out
+        </Button>
       </View>
     </ImageBackground>
   );
 }
-
-const { width } = Dimensions.get("window");
 
 const styles = StyleSheet.create({
   backgroundImage: {
@@ -134,11 +151,10 @@ const styles = StyleSheet.create({
     resizeMode: "cover",
   },
   container: {
-    flex: 1,
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 20,
-    backgroundColor: "rgba(0, 0, 0, 0.5)", 
+    
     borderRadius: 15,
     width: "100%",
     paddingBottom: 40,
@@ -157,7 +173,8 @@ const styles = StyleSheet.create({
   },
   card: {
     width: width * 0.85,
-    marginVertical: 8,
+    marginVertical: 10,
+    marginHorizontal: 8,
     padding: 15,
     backgroundColor: "rgba(255, 255, 255, 0.3)",
     borderRadius: 12,
@@ -181,7 +198,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   cardButton: {
-    width: "45%", 
+    width: "45%",
     paddingVertical: 10,
     borderRadius: 18,
     backgroundColor: "#1E88E5",
@@ -195,5 +212,18 @@ const styles = StyleSheet.create({
   buttonContent: {
     justifyContent: "center",
     flexDirection: "column",
+  },
+  signOutButton: {
+    backgroundColor: 'red', // Red color for the Sign Out button
+    borderRadius: 12,
+    paddingVertical: 10,
+    width: width * 0.50, // Button width similar to cards
+  },
+  fixedBottomContainer: {
+    position: 'absolute',
+    bottom: 20,
+    width: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
