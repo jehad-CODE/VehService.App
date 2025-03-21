@@ -3,6 +3,8 @@ import { View, StyleSheet, Text, ImageBackground, Dimensions, ScrollView } from 
 import { Button, Card, Avatar } from "react-native-paper";
 import { useRouter } from "expo-router";
 
+const { width, height } = Dimensions.get("window");
+
 export default function UserHome() {
   const router = useRouter();
   const user = { name: "Jehad" };
@@ -26,7 +28,7 @@ export default function UserHome() {
             {/* Book a Service Card */}
             <Card style={styles.card}>
               <View style={styles.cardContent}>
-                <Avatar.Icon size={40} icon="car" style={styles.cardIcon} />
+                <Avatar.Icon size={width * 0.1} icon="car" style={styles.cardIcon} />
                 <Button
                   mode="contained"
                   onPress={() => router.push("/customer/booking")}
@@ -42,7 +44,7 @@ export default function UserHome() {
             {/* Vehicle History Card */}
             <Card style={styles.card}>
               <View style={styles.cardContent}>
-                <Avatar.Icon size={40} icon="history" style={styles.cardIcon} />
+                <Avatar.Icon size={width * 0.1} icon="history" style={styles.cardIcon} />
                 <Button
                   mode="contained"
                   onPress={() => router.push("/customer/vehicle-history")}
@@ -58,7 +60,7 @@ export default function UserHome() {
             {/* Track Services Card */}
             <Card style={styles.card}>
               <View style={styles.cardContent}>
-                <Avatar.Icon size={40} icon="map-marker" style={styles.cardIcon} />
+                <Avatar.Icon size={width * 0.1} icon="map-marker" style={styles.cardIcon} />
                 <Button
                   mode="contained"
                   onPress={() => router.push("/customer/service-tracking")}
@@ -74,7 +76,7 @@ export default function UserHome() {
             {/* Profile Card */}
             <Card style={styles.card}>
               <View style={styles.cardContent}>
-                <Avatar.Icon size={40} icon="account" style={styles.cardIcon} />
+                <Avatar.Icon size={width * 0.1} icon="account" style={styles.cardIcon} />
                 <Button
                   mode="contained"
                   onPress={() => router.push("/customer/CustomerProfile")}
@@ -103,8 +105,6 @@ export default function UserHome() {
   );
 }
 
-const { width } = Dimensions.get("window");
-
 const styles = StyleSheet.create({
   backgroundImage: {
     flex: 1,
@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   title: {
-    fontSize: 24,
+    fontSize: width * 0.07, // Making the title responsive
     fontWeight: "bold",
     color: "#fff",
     marginBottom: 15,
@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 18,
     backgroundColor: "#D32F2F",
-    marginTop: 20, // Space between the cards and the sign-out button
+    marginTop: 20,
   },
   cardContainer: {
     flexDirection: "column",
@@ -175,13 +175,13 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   cardButton: {
-    width: "45%",
+    width: width * 0.45, // Adjusting width to be responsive
     paddingVertical: 10,
     borderRadius: 18,
     backgroundColor: "#1E88E5",
   },
   buttonText: {
-    fontSize: 12,
+    fontSize: width * 0.035, // Adjusting font size based on screen width
     fontWeight: "bold",
     textAlign: "center",
   },

@@ -1,8 +1,25 @@
 import React, { useState } from "react";
-import { View, StyleSheet, Alert, ImageBackground, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
-import { Text, TextInput, Button, DefaultTheme, Provider as PaperProvider } from "react-native-paper";
+import {
+  View,
+  StyleSheet,
+  Alert,
+  ImageBackground,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  Dimensions,
+} from "react-native";
+import {
+  Text,
+  TextInput,
+  Button,
+  DefaultTheme,
+  Provider as PaperProvider,
+} from "react-native-paper";
 import { useRouter } from "expo-router";
 import axios from "axios";
+
+const { width, height } = Dimensions.get("window");
 
 const theme = {
   ...DefaultTheme,
@@ -37,15 +54,11 @@ export default function SignUpScreen() {
 
     setLoading(true);
     try {
-      console.log("Sending data to API:", { username, email, password });
-
-      const response = await axios.post("http://192.168.0.103:5000/api/auth/signup", {
+      const response = await axios.post("http://localhost:5000/api/auth/signup", {
         username,
         email,
         password,
       });
-
-      console.log("Response from API:", response.data);
 
       if (response.data.message === "User registered successfully") {
         Alert.alert("Success", "Account created successfully!");
@@ -54,12 +67,7 @@ export default function SignUpScreen() {
         Alert.alert("Error", response.data.message || "Registration failed.");
       }
     } catch (error) {
-      console.error("Sign-up error:", error);
-      if (axios.isAxiosError(error)) {
-        Alert.alert("Error", error.response?.data.message || "Registration failed.");
-      } else {
-        Alert.alert("Error", "An unexpected error occurred.");
-      }
+      Alert.alert("Error", "An unexpected error occurred.");
     } finally {
       setLoading(false);
     }
@@ -69,12 +77,12 @@ export default function SignUpScreen() {
     <PaperProvider theme={theme}>
       <ImageBackground
         source={require("@/assets/images/login.jpg")}
-        style={styles.background}
+        style={[styles.background, { width, height }]}
         resizeMode="cover"
       >
         <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
           <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
-            <View style={styles.innerContainer}>
+            <View style={[styles.innerContainer, { width: width * 0.85 }]}>
               <Text style={styles.title}>Sign Up</Text>
 
               <TextInput
@@ -140,22 +148,11 @@ export default function SignUpScreen() {
 }
 
 const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-    resizeMode: "cover",
-    opacity: 0.9, // Same opacity as Sign In
-  },
-  container: {
-    flex: 1,
-    justifyContent: "center",
-  },
-  scrollContainer: {
-    flexGrow: 1,
-    justifyContent: "center",
-    paddingHorizontal: 20,
-  },
+  background: { flex: 1, justifyContent: "center" },
+  container: { flex: 1, justifyContent: "center" },
+  scrollContainer: { flexGrow: 1, justifyContent: "center", paddingHorizontal: 20 },
   innerContainer: {
-    backgroundColor: "rgba(255, 255, 255, 0.6)", // Same transparency effect as Sign In
+    backgroundColor: "rgba(255, 255, 255, 0.6)",
     borderRadius: 12,
     padding: 20,
     shadowColor: "#000",
@@ -164,31 +161,10 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 5,
   },
-  title: {
-    textAlign: "center",
-    marginBottom: 20,
-    fontWeight: "bold",
-    fontSize: 26,
-    color: "#007bff", // Same primary color as Sign In
-  },
-  input: {
-    marginBottom: 15,
-    backgroundColor: "rgba(255, 255, 255, 0.8)", // Slight transparency for inputs
-  },
-  button: {
-    marginTop: 10,
-    backgroundColor: "#007bff", // Same button color as Sign In
-    borderRadius: 8,
-  },
-  buttonContent: {
-    paddingVertical: 10,
-  },
-  signInButton: {
-    marginTop: 10,
-    alignSelf: "center",
-  },
-  signInText: {
-    color: "#007bff",
-    fontWeight: "bold",
-  },
+  title: { textAlign: "center", marginBottom: 20, fontWeight: "bold", fontSize: 26, color: "#007bff" },
+  input: { marginBottom: 15, backgroundColor: "rgba(255, 255, 255, 0.8)" },
+  button: { marginTop: 10, backgroundColor: "#007bff", borderRadius: 8 },
+  buttonContent: { paddingVertical: 10 },
+  signInButton: { marginTop: 10, alignSelf: "center" },
+  signInText: { color: "#007bff", fontWeight: "bold" },
 });

@@ -6,14 +6,13 @@ import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/dat
 export default function CustomerBookingPage() {
   const [name, setName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [car, setCar] = useState(""); // New state for car input
+  const [car, setCar] = useState("");
   const [date, setDate] = useState(new Date());
   const [time, setTime] = useState("Select Time");
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [note, setNote] = useState("");
   const [bookingType, setBookingType] = useState("choose");
-  const [showTimeMenu, setShowTimeMenu] = useState(false);
-  const [branch, setBranch] = useState("branch1"); // New state for branch selection
+  const [branch, setBranch] = useState("branch1");
   const [showBranchMenu, setShowBranchMenu] = useState(false);
   const [showServiceMenu, setShowServiceMenu] = useState(false);
 
@@ -22,20 +21,19 @@ export default function CustomerBookingPage() {
       id: Math.random().toString(),
       customer: name,
       phoneNumber: phoneNumber,
-      car: car, // Include car details
+      car: car,
       date: date.toDateString(),
       time: time,
       bookingType: bookingType,
       note: note,
-      branch: branch, // Include selected branch
+      branch: branch,
     };
     console.log("New Appointment:", newAppointment);
-    // You can add logic here to save the appointment or navigate to another screen
   };
 
   const onDateChange = (event: DateTimePickerEvent, selectedDate: Date | undefined) => {
     const currentDate = selectedDate || date;
-    setShowDatePicker(Platform.OS === "ios"); // Hide the picker on Android after selection
+    setShowDatePicker(Platform.OS === "ios");
     setDate(currentDate);
   };
 
@@ -56,10 +54,7 @@ export default function CustomerBookingPage() {
 
   return (
     <Provider>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"} // For scrolldown and does not hide the comp
-        style={styles.flex}
-      >
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.flex}>
         <ScrollView contentContainerStyle={styles.container}>
           <Text style={styles.title}>Book Your Appointment</Text>
 
@@ -73,8 +68,8 @@ export default function CustomerBookingPage() {
                 style={styles.input}
                 mode="outlined"
                 left={<TextInput.Icon icon="account" color="#6200ee" />}
-                theme={{ colors: { primary: "#6200ee" } }} // Purple border
-                textColor="#000" // Black text
+                theme={{ colors: { primary: "#6200ee" } }}
+                textColor="#000"
               />
 
               {/* Phone Number Input */}
@@ -86,8 +81,8 @@ export default function CustomerBookingPage() {
                 mode="outlined"
                 keyboardType="phone-pad"
                 left={<TextInput.Icon icon="phone" color="#6200ee" />}
-                theme={{ colors: { primary: "#6200ee" } }} // Purple border
-                textColor="#000" // Black text
+                theme={{ colors: { primary: "#6200ee" } }}
+                textColor="#000"
               />
 
               {/* Car Input */}
@@ -98,69 +93,37 @@ export default function CustomerBookingPage() {
                 style={styles.input}
                 mode="outlined"
                 left={<TextInput.Icon icon="car" color="#6200ee" />}
-                theme={{ colors: { primary: "#6200ee" } }} // Purple border
-                textColor="#000" // Black text
+                theme={{ colors: { primary: "#6200ee" } }}
+                textColor="#000"
               />
 
               {/* Branch Selection */}
               <Text style={styles.label}>Select Branch</Text>
-              <Menu
-                visible={showBranchMenu}
-                onDismiss={() => setShowBranchMenu(false)}
-                anchor={
-                  <Button
-                    mode="outlined"
-                    onPress={() => setShowBranchMenu(true)}
-                    style={styles.pickerButton}
-                    labelStyle={{ color: "#6200ee" }} // Purple text
-                    icon="map-marker" // Branch icon
-                    theme={{ colors: { primary: "#6200ee" } }} // Purple border
-                  >
-                    {branch}
-                  </Button>
-                }
+              <select
+                style={styles.pickerButton}
+                value={branch}
+                onChange={(e) => setBranch(e.target.value)}
               >
                 {branches.map((branchItem, index) => (
-                  <Menu.Item
-                    key={index}
-                    onPress={() => {
-                      setBranch(branchItem);
-                      setShowBranchMenu(false);
-                    }}
-                    title={branchItem}
-                  />
+                  <option key={index} value={branchItem}>
+                    {branchItem}
+                  </option>
                 ))}
-              </Menu>
+              </select>
 
               {/* Service Type Selection */}
               <Text style={styles.label}>Select Service Type</Text>
-              <Menu
-                visible={showServiceMenu}
-                onDismiss={() => setShowServiceMenu(false)}
-                anchor={
-                  <Button
-                    mode="outlined"
-                    onPress={() => setShowServiceMenu(true)}
-                    style={styles.pickerButton}
-                    labelStyle={{ color: "#6200ee" }} // Purple text
-                    icon="wrench" // Service icon
-                    theme={{ colors: { primary: "#6200ee" } }} // Purple border
-                  >
-                    {bookingType}
-                  </Button>
-                }
+              <select
+                style={styles.pickerButton}
+                value={bookingType}
+                onChange={(e) => setBookingType(e.target.value)}
               >
                 {serviceTypes.map((service, index) => (
-                  <Menu.Item
-                    key={index}
-                    onPress={() => {
-                      setBookingType(service);
-                      setShowServiceMenu(false);
-                    }}
-                    title={service}
-                  />
+                  <option key={index} value={service}>
+                    {service}
+                  </option>
                 ))}
-              </Menu>
+              </select>
 
               {/* Date Picker */}
               <Text style={styles.label}>Select Date</Text>
@@ -168,52 +131,31 @@ export default function CustomerBookingPage() {
                 mode="outlined"
                 onPress={() => setShowDatePicker(true)}
                 style={styles.pickerButton}
-                labelStyle={{ color: "#6200ee" }} // Purple text
-                icon="calendar" // Purple icon
-                theme={{ colors: { primary: "#6200ee" } }} // Purple border
+                labelStyle={{ color: "#6200ee" }}
+                icon="calendar"
+                theme={{ colors: { primary: "#6200ee" } }}
               >
                 Choose Date
               </Button>
               {showDatePicker && (
                 <View style={styles.datePickerContainer}>
-                  <DateTimePicker
-                    value={date}
-                    mode="date"
-                    display="default"
-                    onChange={onDateChange}
-                  />
+                  <DateTimePicker value={date} mode="date" display="default" onChange={onDateChange} />
                 </View>
               )}
 
               {/* Time Dropdown */}
               <Text style={styles.label}>Select Time</Text>
-              <Menu
-                visible={showTimeMenu}
-                onDismiss={() => setShowTimeMenu(false)}
-                anchor={
-                  <Button
-                    mode="outlined"
-                    onPress={() => setShowTimeMenu(true)}
-                    style={styles.pickerButton}
-                    labelStyle={{ color: "#6200ee" }} // Purple text
-                    icon="clock" // Purple icon
-                    theme={{ colors: { primary: "#6200ee" } }} // Purple border
-                  >
-                    {time}
-                  </Button>
-                }
+              <select
+                style={styles.pickerButton}
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
               >
                 {timeSlots.map((timeSlot, index) => (
-                  <Menu.Item
-                    key={index}
-                    onPress={() => {
-                      setTime(timeSlot);
-                      setShowTimeMenu(false);
-                    }}
-                    title={timeSlot}
-                  />
+                  <option key={index} value={timeSlot}>
+                    {timeSlot}
+                  </option>
                 ))}
-              </Menu>
+              </select>
 
               {/* Note Input */}
               <TextInput
@@ -225,8 +167,8 @@ export default function CustomerBookingPage() {
                 multiline
                 numberOfLines={4}
                 left={<TextInput.Icon icon="note" color="#6200ee" />}
-                theme={{ colors: { primary: "#6200ee" } }} // Purple border
-                textColor="#000" // Black text
+                theme={{ colors: { primary: "#6200ee" } }}
+                textColor="#000"
               />
             </Card.Content>
           </Card>
@@ -236,9 +178,9 @@ export default function CustomerBookingPage() {
             mode="contained"
             style={styles.button}
             onPress={handleBookAppointment}
-            labelStyle={{ color: "#fff" }} // White text
-            icon="calendar-check" // White icon
-            theme={{ colors: { primary: "#6200ee" } }} // Purple background
+            labelStyle={{ color: "#fff" }}
+            icon="calendar-check"
+            theme={{ colors: { primary: "#6200ee" } }}
           >
             Book Appointment
           </Button>
@@ -277,22 +219,23 @@ const styles = StyleSheet.create({
   },
   pickerButton: {
     marginBottom: 16,
-    borderColor: "#6200ee", // Purple border
+    borderColor: "#6200ee",
+    padding: 10,
   },
   button: {
     marginTop: 20,
     borderRadius: 8,
-    backgroundColor: "#6200ee", // Purple background
+    backgroundColor: "#6200ee",
     paddingVertical: 8,
   },
   label: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#333", // Black text
+    color: "#333",
     marginBottom: 8,
   },
   datePickerContainer: {
     marginBottom: 16,
-    alignItems: "center", // Center the date picker
+    alignItems: "center",
   },
 });

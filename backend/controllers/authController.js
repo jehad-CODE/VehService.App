@@ -1,4 +1,3 @@
-// controllers/authController.js
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 
@@ -15,8 +14,8 @@ const signUp = async (req, res) => {
     const newUser = new User({
       username,
       email,
-      password,  // Store password as plain text
-      role: role || 'customer',  // Default role is 'customer'
+      password,
+      role: role || 'customer', // Default role is 'customer'
     });
 
     await newUser.save();
@@ -37,7 +36,7 @@ const signIn = async (req, res) => {
       return res.status(400).json({ message: 'Invalid email or password' });
     }
 
-    // Password comparison (plain text)
+    // Compare password (plaintext)
     if (user.password !== password) {
       return res.status(400).json({ message: 'Invalid email or password' });
     }
@@ -45,7 +44,7 @@ const signIn = async (req, res) => {
     // Generate JWT token
     const token = jwt.sign(
       { userId: user._id, role: user.role },
-      process.env.JWT_SECRET,
+      'your_jwt_secret', // Replace with a secure secret key
       { expiresIn: '1h' }
     );
 
