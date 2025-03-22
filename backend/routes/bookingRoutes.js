@@ -1,14 +1,20 @@
 const express = require('express');
 const router = express.Router();
-const Booking = require('../models/booking');
+const Booking = require('../models/booking'); // Assuming you have a Booking model
 
-router.post('/book', async (req, res) => {
+// Add a route to search bookings by phone number
+router.get('/search/:phoneNumber', async (req, res) => {
+  const { phoneNumber } = req.params;
+  
   try {
-    const booking = new Booking(req.body);
-    await booking.save();
-    res.status(201).json({ message: 'Booking successfully created!' });
-  } catch (error) {
-    res.status(400).json({ error: error.message });
+    const bookings = await Booking.find({ phoneNumber: phoneNumber });
+    if (bookings.length > 0) {
+      res.status(200).json(bookings);
+    } else {
+      res.status(404).json({ message: "No bookings found for this phone number" });
+    }
+  } catch (err) {
+    res.status(500).json({ message: 'Error retrieving bookings', error: err.message });
   }
 });
 

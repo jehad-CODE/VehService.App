@@ -1,241 +1,185 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, StyleSheet, ScrollView, Platform, KeyboardAvoidingView } from "react-native";
-import { Button, TextInput, Text, Card, Menu, Provider } from "react-native-paper";
-import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
+import { Button, TextInput, Text, Card } from "react-native-paper";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Dropdown } from "react-native-element-dropdown"; // Import Dropdown
 
 export default function CustomerBookingPage() {
   const [name, setName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [car, setCar] = useState("");
   const [date, setDate] = useState(new Date());
-  const [time, setTime] = useState("Select Time");
+  const [time, setTime] = useState("");
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [note, setNote] = useState("");
-  const [bookingType, setBookingType] = useState("choose");
-  const [branch, setBranch] = useState("branch1");
-  const [showBranchMenu, setShowBranchMenu] = useState(false);
-  const [showServiceMenu, setShowServiceMenu] = useState(false);
+  const [bookingType, setBookingType] = useState("");
+  const [branch, setBranch] = useState("");
+  const [userEmail, setUserEmail] = useState("");
 
-  const handleBookAppointment = () => {
-    const newAppointment = {
-      id: Math.random().toString(),
-      customer: name,
-      phoneNumber: phoneNumber,
-      car: car,
-      date: date.toDateString(),
-      time: time,
-      bookingType: bookingType,
-      note: note,
-      branch: branch,
-    };
-    console.log("New Appointment:", newAppointment);
-  };
-
-  const onDateChange = (event: DateTimePickerEvent, selectedDate: Date | undefined) => {
-    const currentDate = selectedDate || date;
-    setShowDatePicker(Platform.OS === "ios");
-    setDate(currentDate);
-  };
-
-  const timeSlots = [
-    "9:00 AM",
-    "10:00 AM",
-    "11:00 AM",
-    "12:00 PM",
-    "1:00 PM",
-    "2:00 PM",
-    "3:00 PM",
-    "4:00 PM",
-    "5:00 PM",
+  const branchOptions = [
+    { label: "Main Branch", value: "main" },
+    { label: "North Branch", value: "north" },
   ];
 
-  const branches = ["Branch 1", "Branch 2"];
-  const serviceTypes = ["Oil Change", "Tire Rotation", "Brake Service"];
+  const serviceOptions = [
+    { label: "Oil Change - $50", value: "oil_change" },
+    { label: "Brake Repair - $100", value: "brake_repair" },
+  ];
+
+  useEffect(() => {
+    const getUserEmail = async () => {
+      const email = await AsyncStorage.getItem("userEmail");
+      if (email) setUserEmail(email);
+    };
+    getUserEmail();
+  }, []);
+
+  const onDateChange = (event: any, selectedDate: Date | undefined) => {
+    if (selectedDate) {
+      setDate(selectedDate);
+      setShowDatePicker(false);
+    }
+  };
+
+  const handleBookAppointment = async () => {
+    const newAppointment = {
+      customer: name,
+      email: userEmail,
+      phoneNumber,
+      car,
+      date: date.toISOString().split("T")[0],
+      time,
+      bookingType,
+      note,
+      branch,
+    };
+
+    try {
+      const response = await fetch("http://localhost:5000/api/booking", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newAppointment),
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        alert("Appointment booked successfully!");
+        
+      } else {
+        alert(result.error || "Failed to book appointment");
+      }
+    } catch (error) {
+      console.error("Booking error:", error);
+      alert("Network error. Please try again.");
+    }
+  };
 
   return (
-    <Provider>
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.flex}>
-        <ScrollView contentContainerStyle={styles.container}>
-          <Text style={styles.title}>Book Your Appointment</Text>
+    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.flex}>
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.title}>Book Your Appointment</Text>
+        <Card style={styles.card}>
+          <Card.Content>
+            <TextInput label="Your Name" value={name} onChangeText={setName} style={styles.input} mode="outlined" left={<TextInput.Icon icon="account" />} />
+            <TextInput label="Phone Number" value={phoneNumber} onChangeText={setPhoneNumber} style={styles.input} keyboardType="phone-pad" mode="outlined" left={<TextInput.Icon icon="phone" />} />
+            <TextInput label="Your Car" value={car} onChangeText={setCar} style={styles.input} mode="outlined" left={<TextInput.Icon icon="car" />} />
 
-          <Card style={styles.card}>
-            <Card.Content>
-              {/* Name Input */}
-              <TextInput
-                label="Your Name"
-                value={name}
-                onChangeText={setName}
-                style={styles.input}
-                mode="outlined"
-                left={<TextInput.Icon icon="account" color="#6200ee" />}
-                theme={{ colors: { primary: "#6200ee" } }}
-                textColor="#000"
+            {/* Dropdown for Branch */}
+            <Text style={styles.label}>Select Branch</Text>
+            <Dropdown
+              data={branchOptions}
+              labelField="label"
+              valueField="value"
+              value={branch}
+              onChange={(item) => setBranch(item.value)}
+              style={styles.dropdown}
+            />
+
+            {/* Dropdown for Service Type */}
+            <Text style={styles.label}>Select Service</Text>
+            <Dropdown
+              data={serviceOptions}
+              labelField="label"
+              valueField="value"
+              value={bookingType}
+              onChange={(item) => setBookingType(item.value)}
+              style={styles.dropdown}
+            />
+
+            {/* Date Picker */}
+            <Text style={styles.label}>Select Date</Text>
+            {Platform.OS === "web" ? (
+              <input
+                type="date"
+                value={date.toISOString().split("T")[0]}
+                onChange={(e) => setDate(new Date(e.target.value))}
+                style={styles.nativeInput}
               />
-
-              {/* Phone Number Input */}
-              <TextInput
-                label="Phone Number"
-                value={phoneNumber}
-                onChangeText={setPhoneNumber}
-                style={styles.input}
-                mode="outlined"
-                keyboardType="phone-pad"
-                left={<TextInput.Icon icon="phone" color="#6200ee" />}
-                theme={{ colors: { primary: "#6200ee" } }}
-                textColor="#000"
-              />
-
-              {/* Car Input */}
-              <TextInput
-                label="Your Car"
-                value={car}
-                onChangeText={setCar}
-                style={styles.input}
-                mode="outlined"
-                left={<TextInput.Icon icon="car" color="#6200ee" />}
-                theme={{ colors: { primary: "#6200ee" } }}
-                textColor="#000"
-              />
-
-              {/* Branch Selection */}
-              <Text style={styles.label}>Select Branch</Text>
-              <select
-                style={styles.pickerButton}
-                value={branch}
-                onChange={(e) => setBranch(e.target.value)}
-              >
-                {branches.map((branchItem, index) => (
-                  <option key={index} value={branchItem}>
-                    {branchItem}
-                  </option>
-                ))}
-              </select>
-
-              {/* Service Type Selection */}
-              <Text style={styles.label}>Select Service Type</Text>
-              <select
-                style={styles.pickerButton}
-                value={bookingType}
-                onChange={(e) => setBookingType(e.target.value)}
-              >
-                {serviceTypes.map((service, index) => (
-                  <option key={index} value={service}>
-                    {service}
-                  </option>
-                ))}
-              </select>
-
-              {/* Date Picker */}
-              <Text style={styles.label}>Select Date</Text>
-              <Button
-                mode="outlined"
-                onPress={() => setShowDatePicker(true)}
-                style={styles.pickerButton}
-                labelStyle={{ color: "#6200ee" }}
-                icon="calendar"
-                theme={{ colors: { primary: "#6200ee" } }}
-              >
-                Choose Date
-              </Button>
-              {showDatePicker && (
-                <View style={styles.datePickerContainer}>
+            ) : (
+              <>
+                <Button mode="outlined" onPress={() => setShowDatePicker(true)} icon="calendar">
+                  {date.toDateString()}
+                </Button>
+                {showDatePicker && (
                   <DateTimePicker value={date} mode="date" display="default" onChange={onDateChange} />
-                </View>
-              )}
+                )}
+              </>
+            )}
 
-              {/* Time Dropdown */}
-              <Text style={styles.label}>Select Time</Text>
-              <select
-                style={styles.pickerButton}
+            {/* Time Selection */}
+            <Text style={styles.label}>Select Time</Text>
+            {Platform.OS === "web" ? (
+              <input
+                type="time"
                 value={time}
                 onChange={(e) => setTime(e.target.value)}
-              >
-                {timeSlots.map((timeSlot, index) => (
-                  <option key={index} value={timeSlot}>
-                    {timeSlot}
-                  </option>
-                ))}
-              </select>
-
-              {/* Note Input */}
-              <TextInput
-                label="Additional Notes"
-                value={note}
-                onChangeText={setNote}
-                style={styles.input}
-                mode="outlined"
-                multiline
-                numberOfLines={4}
-                left={<TextInput.Icon icon="note" color="#6200ee" />}
-                theme={{ colors: { primary: "#6200ee" } }}
-                textColor="#000"
+                style={styles.nativeInput}
               />
-            </Card.Content>
-          </Card>
+            ) : (
+              <TextInput label="Time" value={time} onChangeText={setTime} style={styles.input} mode="outlined" left={<TextInput.Icon icon="clock" />} />
+            )}
 
-          {/* Book Appointment Button */}
-          <Button
-            mode="contained"
-            style={styles.button}
-            onPress={handleBookAppointment}
-            labelStyle={{ color: "#fff" }}
-            icon="calendar-check"
-            theme={{ colors: { primary: "#6200ee" } }}
-          >
-            Book Appointment
-          </Button>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </Provider>
+            {/* Note Input */}
+            <TextInput label="Additional Notes" value={note} onChangeText={setNote} style={styles.input} mode="outlined" multiline numberOfLines={3} left={<TextInput.Icon icon="note" />} />
+          </Card.Content>
+        </Card>
+
+        {/* Book Appointment Button */}
+        <Button mode="contained" style={styles.button} onPress={handleBookAppointment} icon="calendar-check">
+          Book Appointment
+        </Button>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  flex: {
-    flex: 1,
-  },
-  container: {
-    flexGrow: 1,
-    padding: 16,
-    backgroundColor: "#f7f7f7",
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    marginBottom: 20,
-    color: "#333",
-    textAlign: "center",
-  },
-  card: {
-    marginBottom: 16,
-    borderRadius: 8,
-    elevation: 3,
-    backgroundColor: "#fff",
+  flex: { flex: 1 },
+  container: { flexGrow: 1, padding: 16, backgroundColor: "#f7f7f7" },
+  title: { fontSize: 28, fontWeight: "bold", marginBottom: 20, textAlign: "center", color: "#6200ee" },
+  card: { marginBottom: 16, borderRadius: 8, elevation: 3, padding: 10, backgroundColor: "#fff" },
+  input: { marginBottom: 16, backgroundColor: "#fff" },
+  dropdown: {
+    width: "100%",
     padding: 10,
-  },
-  input: {
-    marginBottom: 16,
-    backgroundColor: "#fff",
-  },
-  pickerButton: {
-    marginBottom: 16,
-    borderColor: "#6200ee",
-    padding: 10,
-  },
-  button: {
-    marginTop: 20,
-    borderRadius: 8,
-    backgroundColor: "#6200ee",
-    paddingVertical: 8,
-  },
-  label: {
     fontSize: 16,
-    fontWeight: "bold",
-    color: "#333",
-    marginBottom: 8,
-  },
-  datePickerContainer: {
+    borderWidth: 1,
+    borderColor: "#6200ee",
+    borderRadius: 5,
     marginBottom: 16,
-    alignItems: "center",
+    color: "#6200ee",
+  },
+  button: { marginTop: 20, borderRadius: 8, backgroundColor: "#6200ee", paddingVertical: 8 },
+  label: { fontSize: 16, fontWeight: "bold", marginBottom: 8, color: "#6200ee" },
+  nativeInput: {
+    width: "100%",
+    padding: 10,
+    fontSize: 16,
+    borderWidth: 1,
+    borderColor: "#6200ee",
+    borderRadius: 5,
+    marginBottom: 16,
+    color: "#6200ee",
   },
 });
