@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const Booking = require('../models/booking'); // Assuming you have a Booking model
+const Booking = require('../models/booking');
 
 // Add a route to search bookings by phone number
 router.get('/search/:phoneNumber', async (req, res) => {

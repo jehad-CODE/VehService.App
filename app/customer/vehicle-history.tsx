@@ -1,53 +1,68 @@
-import React from "react";
-import { View, StyleSheet, FlatList } from "react-native";
+import React, { useState } from "react";
+import { View, StyleSheet, FlatList, TextInput, Button, Alert } from "react-native";
 import { Card, Text } from "react-native-paper";
-
-// Mock data for service history
-const serviceHistory = [
-  {
-    id: "1",
-    date: "March 12, 2025",
-    serviceType: "Oil Change",
-    cost: "$50",
-  },
-  {
-    id: "2",
-    date: "March 15, 2025",
-    serviceType: "Tire Rotation",
-    cost: "$30",
-  },
-  {
-    id: "3",
-    date: "March 20, 2025",
-    serviceType: "Brake Service",
-    cost: "$100",
-  },
-  {
-    id: "4",
-    date: "April 1, 2025",
-    serviceType: "Engine Tune-Up",
-    cost: "$150",
-  },
-];
+import axios from "axios";
 
 export default function ViewHistory() {
+  const [phoneNumber, setPhoneNumber] = useState(""); // State to hold the phone number input
+  const [serviceHistory, setServiceHistory] = useState<any[]>([]); // State to hold the service history data
+
+  // Function to handle search and fetch data based on phone number
+  const handleSearch = async () => {
+    if (phoneNumber.trim() === "") {
+      alert("Please enter a phone number.");
+      return;
+    }
+
+    try {
+      // Replace localhost with your machine's IP address when testing on a physical device
+    const response = await axios.get(`http://localhost:5000/api/booking/search/${phoneNumber}`);
+      
+      // Assuming the response contains the service history data
+      if (response.data && response.data.length > 0) {
+        setServiceHistory(response.data); // Update state with fetched data
+      } else {
+        alert("No service history found for this phone number.");
+        setServiceHistory([]); // Clear the previous data
+      }
+    } catch (error) {
+      console.error("Error fetching service history:", error);
+      alert("There was an error fetching the service history.");
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Service History</Text>
 
-      <FlatList
-        data={serviceHistory}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <Card style={styles.card}>
-            <Card.Content>
-              <Text style={styles.serviceType}>{item.serviceType}</Text>
-              <Text style={styles.date}>Date: {item.date}</Text>
-              <Text style={styles.cost}>Cost: {item.cost}</Text>
-            </Card.Content>
-          </Card>
-        )}
+      {/* Phone number input and search button */}
+      <TextInput
+        style={styles.input}
+        placeholder="Enter Phone Number"
+        keyboardType="phone-pad"
+        value={phoneNumber}
+        onChangeText={setPhoneNumber}
       />
+      <Button title="Search" onPress={handleSearch} />
+
+      {/* Display the service history if available */}
+      {serviceHistory.length > 0 ? (
+        <FlatList
+          data={serviceHistory}
+          keyExtractor={(item) => item._id.toString()} // Use _id as unique identifier from MongoDB
+          renderItem={({ item }) => (
+            <Card style={styles.card}>
+              <Card.Content>
+                <Text style={styles.serviceType}>{item.bookingType}</Text>
+                <Text style={styles.date}>Date: {new Date(item.date).toLocaleDateString()}</Text>
+                <Text style={styles.cost}>Branch: {item.branch}</Text>
+              </Card.Content>
+            </Card>
+          )}
+        />
+      ) : (
+        <Text style={styles.noData}>No service history to display.</Text>
+      )}
     </View>
   );
 }
@@ -64,6 +79,14 @@ const styles = StyleSheet.create({
     color: "#333",
     marginBottom: 20,
     textAlign: "center",
+  },
+  input: {
+    height: 40,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingLeft: 10,
+    marginBottom: 16,
   },
   card: {
     marginBottom: 16,
@@ -86,5 +109,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#666",
     marginTop: 4,
+  },
+  noData: {
+    fontSize: 16,
+    color: "#999",
+    textAlign: "center",
+    marginTop: 20,
   },
 });

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -50,16 +50,18 @@ export default function SignInScreen() {
         password,
       });
 
-      await AsyncStorage.setItem("token", response.data.token);
-      const userRole = response.data.user?.role;
+      const { token, user } = response.data;
+      await AsyncStorage.setItem("token", token);
+      await AsyncStorage.setItem("user", JSON.stringify(user));
 
-      if (userRole === "admin") {
+      if (user.role === "admin") {
         router.push("/admin/dashboard");
-      } else if (userRole === "customer") {
+      } else if (user.role === "customer") {
         router.push("/customer/home");
       } else {
         Alert.alert("Error", "Invalid user role.");
       }
+
       Alert.alert("Success", "Sign-in successful!");
     } catch (error) {
       const errorMessage = axios.isAxiosError(error)
@@ -74,7 +76,7 @@ export default function SignInScreen() {
   return (
     <PaperProvider theme={theme}>
       <ImageBackground
-        source={require("@/assets/images/login.jpg")}
+        source={require("@/assets/images/login2.jpg")}
         style={[styles.background, { width, height }]}
         resizeMode="cover"
       >

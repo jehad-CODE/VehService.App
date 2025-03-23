@@ -1,166 +1,151 @@
-import React, { useState } from "react";
-import { View, StyleSheet, Text, Image, ScrollView } from "react-native";
-import { Button, Card, TextInput, Avatar } from "react-native-paper";
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  Alert,
+  Dimensions,
+} from "react-native";
+import {
+  Text,
+  TextInput,
+  Button,
+  DefaultTheme,
+  Provider as PaperProvider,
+} from "react-native-paper";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
+
+const { width } = Dimensions.get("window");
+
+const theme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    primary: "#007bff",
+    outline: "black",
+  },
+};
 
 export default function CustomerProfile() {
-  const [isEditing, setIsEditing] = useState(false);
-  const [user, setUser] = useState({
-    name: "Jehad",
-    email: "jehad@example.com",
-    phone: "+123 456 7890",
-    car: "Toyota Camry 2020",
-  });
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleEdit = () => {
-    setIsEditing(!isEditing);
-  };
+  useEffect(() => {
+    const loadUserData = async () => {
+      try {
+        const storedUser = await AsyncStorage.getItem("user");
+        if (storedUser) {
+          const user = JSON.parse(storedUser);
+          setName(user.name || ""); // Ensure name is not empty
+          setEmail(user.email || ""); // Ensure email is not empty
+          setPassword(""); // Don't show password for security reasons
+        }
+      } catch (error) {
+        Alert.alert("Error", "Failed to load user data.");
+      }
+    };
 
-  const handleSave = () => {
-    setIsEditing(false);
-    // Add logic to save changes to the backend or local storage
-    console.log("Profile updated:", user);
-  };
+    loadUserData();
+  }, []);
 
-  const handleChange = (field: string, value: string) => {
-    setUser({ ...user, [field]: value });
+  const handleUpdateProfile = async () => {
+    if (!name || !email) {
+      Alert.alert("Error", "Name and email cannot be empty.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const token = await AsyncStorage.getItem("token");
+      const response = await axios.put(
+        "http://localhost:5000/api/user/update",
+        { name, email, password },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      await AsyncStorage.setItem("user", JSON.stringify(response.data.user));
+      Alert.alert("Success", "Profile updated successfully!");
+    } catch (error) {
+      Alert.alert("Error", "Failed to update profile.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-     
-      <Card style={styles.card}>
-        <Card.Content>
-          {/* Editable Name Field */}
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>Name:</Text>
-            {isEditing ? (
-              <TextInput
-                value={user.name}
-                onChangeText={(value) => handleChange("name", value)}
-                style={styles.input}
-                mode="outlined"
-                dense
-              />
-            ) : (
-              <Text style={styles.value}>{user.name}</Text>
-            )}
-          </View>
+    <PaperProvider theme={theme}>
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
+        <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
+          <View style={[styles.innerContainer, { width: width * 0.85 }]}>
+            <Text style={styles.title}>Profile</Text>
 
-          {/* Editable Email Field */}
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>Email:</Text>
-            {isEditing ? (
-              <TextInput
-                value={user.email}
-                onChangeText={(value) => handleChange("email", value)}
-                style={styles.input}
-                mode="outlined"
-                dense
-              />
-            ) : (
-              <Text style={styles.value}>{user.email}</Text>
-            )}
-          </View>
+            <TextInput
+              label="Name"
+              mode="outlined"
+              value={name}
+              onChangeText={setName}
+              style={styles.input}
+              theme={theme}
+            />
 
-          {/* Editable Phone Field */}
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>Phone:</Text>
-            {isEditing ? (
-              <TextInput
-                value={user.phone}
-                onChangeText={(value) => handleChange("phone", value)}
-                style={styles.input}
-                mode="outlined"
-                dense
-              />
-            ) : (
-              <Text style={styles.value}>{user.phone}</Text>
-            )}
-          </View>
+            <TextInput
+              label="Email"
+              mode="outlined"
+              value={email}
+              onChangeText={setEmail}
+              autoCapitalize="none"
+              keyboardType="email-address"
+              style={styles.input}
+              theme={theme}
+            />
 
-          {/* Editable Car Field */}
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>Car:</Text>
-            {isEditing ? (
-              <TextInput
-                value={user.car}
-                onChangeText={(value) => handleChange("car", value)}
-                style={styles.input}
-                mode="outlined"
-                dense
-              />
-            ) : (
-              <Text style={styles.value}>{user.car}</Text>
-            )}
-          </View>
-        </Card.Content>
-      </Card>
+            <TextInput
+              label="New Password (Optional)"
+              mode="outlined"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={true}
+              style={styles.input}
+              theme={theme}
+              placeholder="Leave empty to keep current password"
+            />
 
-      {/* Edit/Save Button */}
-      <Button
-        mode="contained"
-        style={styles.editButton}
-        onPress={isEditing ? handleSave : handleEdit}
-        labelStyle={{ color: "#fff" }}
-      >
-        {isEditing ? "Save Changes" : "Edit Profile"}
-      </Button>
-    </ScrollView>
+            <Button
+              mode="contained"
+              onPress={handleUpdateProfile}
+              style={styles.button}
+              contentStyle={styles.buttonContent}
+              disabled={loading}
+            >
+              {loading ? "Updating..." : "Update Profile"}
+            </Button>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </PaperProvider>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    padding: 16,
-    backgroundColor: "#f7f7f7",
+  container: { flex: 1, justifyContent: "center", backgroundColor: "#f4f4f4" },
+  scrollContainer: { flexGrow: 1, justifyContent: "center", paddingHorizontal: 20 },
+  innerContainer: {
+    backgroundColor: "rgba(255, 255, 255, 0.95)",
+    borderRadius: 12,
+    padding: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 5,
   },
-  profileHeader: {
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  profileImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    marginBottom: 10,
-  },
-  userName: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#333",
-  },
-  card: {
-    marginBottom: 20,
-    borderRadius: 8,
-    elevation: 3,
-    backgroundColor: "#fff",
-  },
-  infoRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  label: {
-    fontSize: 16,
-    color: "#666",
-    flex: 1,
-  },
-  value: {
-    fontSize: 16,
-    color: "#333",
-    fontWeight: "bold",
-    flex: 2,
-  },
-  input: {
-    flex: 2,
-    backgroundColor: "#fff",
-  },
-  editButton: {
-    marginTop: 20,
-    borderRadius: 8,
-    backgroundColor: "#6200ee",
-    paddingVertical: 8,
-  },
+  title: { textAlign: "center", marginBottom: 20, fontWeight: "bold", fontSize: 24, color: "#007bff" },
+  input: { marginBottom: 15, backgroundColor: "rgba(255, 255, 255, 0.9)" },
+  button: { marginTop: 10, backgroundColor: "#007bff", borderRadius: 8 },
+  buttonContent: { paddingVertical: 10 },
 });

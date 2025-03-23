@@ -23,8 +23,8 @@ export default function CustomerBookingPage() {
   ];
 
   const serviceOptions = [
-    { label: "Oil Change - $50", value: "oil_change" },
-    { label: "Brake Repair - $100", value: "brake_repair" },
+    { label: "Oil Change - $50", value: "oil_change - $50" },
+    { label: "Brake Repair - $100", value: "brake_repair - $100" },
   ];
 
   useEffect(() => {
