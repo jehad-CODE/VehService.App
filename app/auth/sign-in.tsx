@@ -53,6 +53,7 @@ export default function SignInScreen() {
       const { token, user } = response.data;
       await AsyncStorage.setItem("token", token);
       await AsyncStorage.setItem("user", JSON.stringify(user));
+      await AsyncStorage.setItem("userEmail", email); // Save email explicitly
 
       if (user.role === "admin") {
         router.push("/admin/dashboard");

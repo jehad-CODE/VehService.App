@@ -1,33 +1,74 @@
-import React, { useState } from "react";
-import { View, StyleSheet, FlatList, TextInput, Button, Alert } from "react-native";
-import { Card, Text } from "react-native-paper";
-import axios from "axios";
+import React, { useState, useEffect } from "react";
+import { View, StyleSheet, FlatList, Text, Alert } from "react-native";
+import { Card } from "react-native-paper";
+import AsyncStorage from "@react-native-async-storage/async-storage"; // Import AsyncStorage
+
+// Define the Type for serviceTracking data
+interface Service {
+  id: string;
+  customer: string;
+  car: string;
+  bookingType: string;
+  date: string;
+  time: string;
+  note?: string;
+  status: string; // New field for status
+}
 
 export default function ViewHistory() {
-  const [phoneNumber, setPhoneNumber] = useState(""); // State to hold the phone number input
-  const [serviceHistory, setServiceHistory] = useState<any[]>([]); // State to hold the service history data
+  const [filteredServices, setFilteredServices] = useState<Service[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Function to handle search and fetch data based on phone number
-  const handleSearch = async () => {
-    if (phoneNumber.trim() === "") {
-      alert("Please enter a phone number.");
-      return;
-    }
-
-    try {
-      // Replace localhost with your machine's IP address when testing on a physical device
-    const response = await axios.get(`http://localhost:5000/api/booking/search/${phoneNumber}`);
-      
-      // Assuming the response contains the service history data
-      if (response.data && response.data.length > 0) {
-        setServiceHistory(response.data); // Update state with fetched data
-      } else {
-        alert("No service history found for this phone number.");
-        setServiceHistory([]); // Clear the previous data
+  useEffect(() => {
+    const fetchData = async () => {
+      const email = await AsyncStorage.getItem("userEmail"); // Get email from AsyncStorage
+      if (!email) {
+        Alert.alert("Error", "No email found. Please sign in.");
+        return;
       }
-    } catch (error) {
-      console.error("Error fetching service history:", error);
-      alert("There was an error fetching the service history.");
+
+      setLoading(true);
+      setError(null);
+
+      try {
+        const response = await fetch(`http://localhost:5000/api/booking/search/${email}`); // Use email to fetch data
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch services");
+        }
+
+        const data = await response.json();
+
+        if (data.length === 0) {
+          Alert.alert("No Results", "No service history found for this email.");
+        }
+
+        setFilteredServices(data);
+      } catch (err) {
+        console.error("Error fetching data:", err);
+        setError("Error fetching service data");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []); // The effect runs once when the component is mounted
+
+  // Function to get status color
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "pending":
+        return "#FFA500"; // Orange
+      case "in progress":
+        return "#1E90FF"; // Blue
+      case "approved":
+        return "#008000"; // Green
+      case "cancelled":
+        return "#FF0000"; // Red
+      default:
+        return "#000"; // Black (default)
     }
   };
 
@@ -35,33 +76,44 @@ export default function ViewHistory() {
     <View style={styles.container}>
       <Text style={styles.title}>Service History</Text>
 
-      {/* Phone number input and search button */}
-      <TextInput
-        style={styles.input}
-        placeholder="Enter Phone Number"
-        keyboardType="phone-pad"
-        value={phoneNumber}
-        onChangeText={setPhoneNumber}
-      />
-      <Button title="Search" onPress={handleSearch} />
+      {loading && <Text style={styles.loadingText}>Loading...</Text>}
+      {error && <Text style={styles.errorText}>{error}</Text>}
 
-      {/* Display the service history if available */}
-      {serviceHistory.length > 0 ? (
+      {filteredServices.length === 0 ? (
+        <Text style={styles.noResults}>No results found</Text>
+      ) : (
         <FlatList
-          data={serviceHistory}
-          keyExtractor={(item) => item._id.toString()} // Use _id as unique identifier from MongoDB
+          data={filteredServices}
+          keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <Card style={styles.card}>
               <Card.Content>
-                <Text style={styles.serviceType}>{item.bookingType}</Text>
-                <Text style={styles.date}>Date: {new Date(item.date).toLocaleDateString()}</Text>
-                <Text style={styles.cost}>Branch: {item.branch}</Text>
+                <View style={styles.serviceDetails}>
+                  <Text style={styles.label}>Username:</Text>
+                  <Text style={styles.value}>{item.customer}</Text>
+
+                  <Text style={styles.label}>Car:</Text>
+                  <Text style={styles.value}>{item.car}</Text>
+
+                  <Text style={styles.label}>Service Type:</Text>
+                  <Text style={styles.value}>{item.bookingType}</Text>
+
+                  {item.note && (
+                    <>
+                      <Text style={styles.label}>Note:</Text>
+                      <Text style={styles.value}>{item.note}</Text>
+                    </>
+                  )}
+
+                  <Text style={styles.label}>Date:</Text>
+                  <Text style={styles.value}>
+                    {new Date(item.date).toLocaleDateString()} at {item.time}
+                  </Text>
+                </View>
               </Card.Content>
             </Card>
           )}
         />
-      ) : (
-        <Text style={styles.noData}>No service history to display.</Text>
       )}
     </View>
   );
@@ -80,39 +132,46 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     textAlign: "center",
   },
-  input: {
-    height: 40,
-    borderColor: "#ccc",
-    borderWidth: 1,
-    borderRadius: 5,
-    paddingLeft: 10,
-    marginBottom: 16,
-  },
   card: {
     marginBottom: 16,
     borderRadius: 8,
     elevation: 3,
     backgroundColor: "#fff",
-    padding: 10,
+    padding: 12,
   },
-  serviceType: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#333",
+  serviceDetails: {
+    flexDirection: "column",
   },
-  date: {
+  label: {
     fontSize: 14,
-    color: "#666",
-    marginTop: 4,
+    fontWeight: "bold",
+    color: "#555",
+    marginTop: 6,
   },
-  cost: {
+  value: {
     fontSize: 14,
-    color: "#666",
-    marginTop: 4,
+    color: "#222",
+    marginBottom: 4,
   },
-  noData: {
+  status: {
+    fontSize: 14,
+    fontWeight: "bold",
+  },
+  noResults: {
     fontSize: 16,
-    color: "#999",
+    color: "#666",
+    textAlign: "center",
+    marginTop: 20,
+  },
+  loadingText: {
+    fontSize: 16,
+    color: "blue",
+    textAlign: "center",
+    marginTop: 20,
+  },
+  errorText: {
+    fontSize: 16,
+    color: "red",
     textAlign: "center",
     marginTop: 20,
   },

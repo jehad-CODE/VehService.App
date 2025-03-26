@@ -69,38 +69,19 @@ app.post("/api/auth/signin", async (req, res) => {
   }
 });
 
-/* ----------------------------- UPDATE PROFILE ROUTE ----------------------------- */
-app.put("/api/user/update", async (req, res) => {
-  const { id, username, email, password } = req.body; // Accept user data
-
-  try {
-    const user = await User.findById(id);
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    // Update fields only if new values are provided
-    if (username) user.username = username;
-    if (email) user.email = email;
-    if (password) user.password = password;
-
-    await user.save(); // Save the updated user
-
-    res.status(200).json({ message: "Profile updated successfully", user });
-  } catch (error) {
-    console.error("Error updating profile:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-});
 
 /* ----------------------------- BOOKING ROUTE ----------------------------- */
 app.post("/api/booking", async (req, res) => {
-  const { customer, phoneNumber, car, date, time, bookingType, note, branch } = req.body;
+  const { customer, email, phoneNumber, car, date, time, bookingType, note, branch } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ message: "Email is required." });
+  }
 
   try {
     const newBooking = new Booking({
       customer,
+      email,
       phoneNumber,
       car,
       date,
@@ -108,28 +89,33 @@ app.post("/api/booking", async (req, res) => {
       bookingType,
       note,
       branch,
+      // Do NOT need to explicitly set the 'status' since it's automatically set to 'pending'
     });
 
     await newBooking.save();
 
-    res.status(201).json({ message: "Booking successful", booking: newBooking });
+    res.status(201).json({
+      message: "Booking successful",
+      booking: newBooking, // The status should appear in the response here
+    });
   } catch (error) {
     console.error("Error booking appointment:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });
 
-/* ---------------------- SEARCH BOOKING BY PHONE NUMBER ---------------------- */
-app.get("/api/booking/search/:phoneNumber", async (req, res) => {
-  const { phoneNumber } = req.params;
+//* ---------------------- SEARCH BOOKING BY USER EMAIL ---------------------- */
+app.get("/api/booking/search/:email", async (req, res) => {
+  const { email } = req.params;
 
   try {
-    const bookings = await Booking.find({ phoneNumber });
+    // Search bookings by email, not phone number
+    const bookings = await Booking.find({ email });
 
     if (bookings.length > 0) {
       return res.status(200).json(bookings);
     } else {
-      return res.status(404).json({ message: "No service history found for this phone number." });
+      return res.status(404).json({ message: "No service history found for this email." });
     }
   } catch (error) {
     console.error("Error fetching service history:", error);
@@ -137,8 +123,11 @@ app.get("/api/booking/search/:phoneNumber", async (req, res) => {
   }
 });
 
+
 /* ----------------------------- START SERVER ----------------------------- */
 const port = 5000;
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
 });
+
+  

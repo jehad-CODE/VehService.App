@@ -1,60 +1,41 @@
-const Booking = require('../models/booking');
+const Booking = require('../models/booking'); // Import the Booking model
 
-exports.createBooking = async (req, res) => {
-  const { userId, vehicleId, serviceId, appointmentDate } = req.body;
-
+// Controller to create a booking
+async function createBooking(req, res) {
   try {
+    // Destructure booking details from the request body
+    const { customer, email, phoneNumber, car, date, time, bookingType, note, branch } = req.body;
+
+    // Create a new booking instance with the data
     const newBooking = new Booking({
-      userId,
-      vehicleId,
-      serviceId,
-      appointmentDate,
+      customer,
+      email,
+      phoneNumber,
+      car,
+      date,
+      time,
+      bookingType,
+      note,
+      branch,
     });
 
+    // Save the booking to the database
     await newBooking.save();
-    res.status(201).json({ message: 'Booking created successfully', booking: newBooking });
-  } catch (err) {
-    res.status(500).json({ message: 'Error creating booking', error: err.message });
+
+    // Send response to the client
+    res.status(201).json({
+      message: 'Booking successful',
+      booking: newBooking,
+    });
+  } catch (error) {
+    // Handle errors and send a failure response
+    res.status(500).json({
+      message: 'Failed to create booking',
+      error: error.message,
+    });
   }
-};
+}
 
-exports.getBookings = async (req, res) => {
-  try {
-    const bookings = await Booking.find().populate('userId vehicleId serviceId');
-    res.status(200).json(bookings);
-  } catch (err) {
-    res.status(500).json({ message: 'Error retrieving bookings', error: err.message });
-  }
-};
-
-exports.getBookingById = async (req, res) => {
-  try {
-    const booking = await Booking.findById(req.params.id).populate('userId vehicleId serviceId');
-    if (!booking) {
-      return res.status(404).json({ message: 'Booking not found' });
-    }
-    res.status(200).json(booking);
-  } catch (err) {
-    res.status(500).json({ message: 'Error retrieving booking', error: err.message });
-  }
-};
-
-exports.updateBooking = async (req, res) => {
-  const { status } = req.body;
-
-  try {
-    const booking = await Booking.findByIdAndUpdate(
-      req.params.id,
-      { status },
-      { new: true }
-    );
-
-    if (!booking) {
-      return res.status(404).json({ message: 'Booking not found' });
-    }
-
-    res.status(200).json({ message: 'Booking updated', booking });
-  } catch (err) {
-    res.status(500).json({ message: 'Error updating booking', error: err.message });
-  }
+module.exports = {
+  createBooking,
 };

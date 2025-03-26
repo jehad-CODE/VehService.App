@@ -1,42 +1,20 @@
 const mongoose = require('mongoose');
 
+// Define the schema for booking
 const bookingSchema = new mongoose.Schema({
-  customer: {
-    type: String,
-    required: true,
-  },
-  phoneNumber: {
-    type: String,
-    required: true,
-  },
-  car: {
-    type: String,
-    required: true,
-  },
-  date: {
-    type: Date,
-    required: true,
-  },
-  time: {
-    type: String,
-    required: true,
-  },
-  bookingType: {
-    type: String,
-    required: true,
-  },
-  note: {
-    type: String,
-  },
-  branch: {
-    type: String,
-    required: true,
-  },
-  status: {
-    type: String,
-    enum: ['pending', 'confirmed', 'completed'],
-    default: 'pending',
-  },
+  customer: { type: String, required: true },
+  email: { type: String, required: true },
+  phoneNumber: { type: String, required: true },
+  car: { type: String, required: true },
+  date: { type: Date, required: true },
+  time: { type: String, required: true },
+  bookingType: { type: String, required: true },
+  note: { type: String, required: false },
+  branch: { type: String, required: false },
+  status: { type: String, default: 'pending' }, // Ensure this is set correctly
 });
 
-module.exports = mongoose.model('Booking', bookingSchema);
+// Create the model from the schema
+const Booking = mongoose.model('Booking', bookingSchema);
+
+module.exports = Booking;

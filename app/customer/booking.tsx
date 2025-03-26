@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { View, StyleSheet, ScrollView, Platform, KeyboardAvoidingView } from "react-native";
 import { Button, TextInput, Text, Card } from "react-native-paper";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Dropdown } from "react-native-element-dropdown"; // Import Dropdown
+import AsyncStorage from "@react-native-async-storage/async-storage"; // Import AsyncStorage
 
 export default function CustomerBookingPage() {
   const [name, setName] = useState("");
@@ -15,7 +15,18 @@ export default function CustomerBookingPage() {
   const [note, setNote] = useState("");
   const [bookingType, setBookingType] = useState("");
   const [branch, setBranch] = useState("");
-  const [userEmail, setUserEmail] = useState("");
+  const [userEmail, setUserEmail] = useState(""); // Allow user to input email
+
+  // Fetch the email from AsyncStorage when the component mounts
+  useEffect(() => {
+    const fetchUserEmail = async () => {
+      const email = await AsyncStorage.getItem("userEmail");
+      if (email) {
+        setUserEmail(email);
+      }
+    };
+    fetchUserEmail();
+  }, []);
 
   const branchOptions = [
     { label: "Main Branch", value: "main" },
@@ -23,17 +34,9 @@ export default function CustomerBookingPage() {
   ];
 
   const serviceOptions = [
-    { label: "Oil Change - $50", value: "oil_change - $50" },
-    { label: "Brake Repair - $100", value: "brake_repair - $100" },
+    { label: "Oil Change - $50", value: "oil_change $50", cost: 50 },
+    { label: "Brake Repair - $100", value: "brake_repair $100", cost: 100 },
   ];
-
-  useEffect(() => {
-    const getUserEmail = async () => {
-      const email = await AsyncStorage.getItem("userEmail");
-      if (email) setUserEmail(email);
-    };
-    getUserEmail();
-  }, []);
 
   const onDateChange = (event: any, selectedDate: Date | undefined) => {
     if (selectedDate) {
@@ -43,9 +46,15 @@ export default function CustomerBookingPage() {
   };
 
   const handleBookAppointment = async () => {
+    // Check if user email is available
+    if (!userEmail) {
+      alert("Please enter your email address.");
+      return;
+    }
+
     const newAppointment = {
       customer: name,
-      email: userEmail,
+      email: userEmail,  // Use the email input by the user
       phoneNumber,
       car,
       date: date.toISOString().split("T")[0],
@@ -65,7 +74,6 @@ export default function CustomerBookingPage() {
       const result = await response.json();
       if (response.ok) {
         alert("Appointment booked successfully!");
-        
       } else {
         alert(result.error || "Failed to book appointment");
       }
@@ -81,9 +89,49 @@ export default function CustomerBookingPage() {
         <Text style={styles.title}>Book Your Appointment</Text>
         <Card style={styles.card}>
           <Card.Content>
-            <TextInput label="Your Name" value={name} onChangeText={setName} style={styles.input} mode="outlined" left={<TextInput.Icon icon="account" />} />
-            <TextInput label="Phone Number" value={phoneNumber} onChangeText={setPhoneNumber} style={styles.input} keyboardType="phone-pad" mode="outlined" left={<TextInput.Icon icon="phone" />} />
-            <TextInput label="Your Car" value={car} onChangeText={setCar} style={styles.input} mode="outlined" left={<TextInput.Icon icon="car" />} />
+            <TextInput
+              label="Your Name"
+              value={name}
+              onChangeText={setName}
+              style={[styles.input, styles.inputFocus]}
+              mode="outlined"
+              left={<TextInput.Icon icon="account" />}
+              activeOutlineColor="#007bff"
+              outlineColor="#ccc"
+            />
+            <TextInput
+              label="Phone Number"
+              value={phoneNumber}
+              onChangeText={setPhoneNumber}
+              style={[styles.input, styles.inputFocus]}
+              keyboardType="phone-pad"
+              mode="outlined"
+              left={<TextInput.Icon icon="phone" />}
+              activeOutlineColor="#007bff"
+              outlineColor="#ccc"
+            />
+            <TextInput
+              label="Your Car"
+              value={car}
+              onChangeText={setCar}
+              style={[styles.input, styles.inputFocus]}
+              mode="outlined"
+              left={<TextInput.Icon icon="car" />}
+              activeOutlineColor="#007bff"
+              outlineColor="#ccc"
+            />
+
+            {/* User inputs their own email (filled automatically) */}
+            <TextInput
+              label="Your Email"
+              value={userEmail}
+              onChangeText={setUserEmail} // Update email when user types
+              style={[styles.input, styles.inputFocus]}
+              mode="outlined"
+              left={<TextInput.Icon icon="email" />}
+              activeOutlineColor="#007bff"
+              outlineColor="#ccc"
+            />
 
             {/* Dropdown for Branch */}
             <Text style={styles.label}>Select Branch</Text>
@@ -137,11 +185,31 @@ export default function CustomerBookingPage() {
                 style={styles.nativeInput}
               />
             ) : (
-              <TextInput label="Time" value={time} onChangeText={setTime} style={styles.input} mode="outlined" left={<TextInput.Icon icon="clock" />} />
+              <TextInput
+                label="Time"
+                value={time}
+                onChangeText={setTime}
+                style={[styles.input, styles.inputFocus]}
+                mode="outlined"
+                left={<TextInput.Icon icon="clock" />}
+                activeOutlineColor="#007bff"
+                outlineColor="#ccc"
+              />
             )}
 
             {/* Note Input */}
-            <TextInput label="Additional Notes" value={note} onChangeText={setNote} style={styles.input} mode="outlined" multiline numberOfLines={3} left={<TextInput.Icon icon="note" />} />
+            <TextInput
+              label="Additional Notes"
+              value={note}
+              onChangeText={setNote}
+              style={[styles.input, styles.inputFocus]}
+              mode="outlined"
+              multiline
+              numberOfLines={3}
+              left={<TextInput.Icon icon="note" />}
+              activeOutlineColor="#007bff"
+              outlineColor="#ccc"
+            />
           </Card.Content>
         </Card>
 
@@ -157,7 +225,7 @@ export default function CustomerBookingPage() {
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   container: { flexGrow: 1, padding: 16, backgroundColor: "#f7f7f7" },
-  title: { fontSize: 28, fontWeight: "bold", marginBottom: 20, textAlign: "center", color: "#6200ee" },
+  title: { fontSize: 28, fontWeight: "bold", marginBottom: 20, textAlign: "center", color: "#007bff" },
   card: { marginBottom: 16, borderRadius: 8, elevation: 3, padding: 10, backgroundColor: "#fff" },
   input: { marginBottom: 16, backgroundColor: "#fff" },
   dropdown: {
@@ -165,21 +233,23 @@ const styles = StyleSheet.create({
     padding: 10,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: "#6200ee",
+    borderColor: "#007bff", // Changed to blue color
     borderRadius: 5,
     marginBottom: 16,
-    color: "#6200ee",
+    color: "#007bff", // Changed to blue color
   },
-  button: { marginTop: 20, borderRadius: 8, backgroundColor: "#6200ee", paddingVertical: 8 },
-  label: { fontSize: 16, fontWeight: "bold", marginBottom: 8, color: "#6200ee" },
+  button: { marginTop: 20, borderRadius: 8, backgroundColor: "#007bff", paddingVertical: 8 },
+  label: { fontSize: 16, fontWeight: "bold", marginBottom: 8, color: "#007bff" }, // Changed to blue color
   nativeInput: {
     width: "100%",
     padding: 10,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: "#6200ee",
+    borderColor: "#007bff", // Changed to blue color
     borderRadius: 5,
     marginBottom: 16,
-    color: "#6200ee",
   },
+  inputFocus: {
+    borderColor: "#007bff", // Change border color when focused
+  }
 });

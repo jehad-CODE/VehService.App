@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, StyleSheet, FlatList, TextInput, Button, Text, Alert } from "react-native";
 import { Card } from "react-native-paper";
+import AsyncStorage from "@react-native-async-storage/async-storage"; // Import AsyncStorage
 
 // Define the Type for serviceTracking data
 interface Service {
@@ -15,41 +16,45 @@ interface Service {
 }
 
 export default function TrackService() {
-  const [searchTerm, setSearchTerm] = useState("");
   const [filteredServices, setFilteredServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSearch = async () => {
-    if (!searchTerm.trim()) {
-      Alert.alert("Error", "Please enter a phone number to search.");
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      const response = await fetch(`http://localhost:5000/api/booking/search/${searchTerm}`);
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch services");
+  useEffect(() => {
+    const fetchData = async () => {
+      const email = await AsyncStorage.getItem("userEmail"); // Get email from AsyncStorage
+      if (!email) {
+        Alert.alert("Error", "No email found. Please sign in.");
+        return;
       }
 
-      const data = await response.json();
+      setLoading(true);
+      setError(null);
 
-      if (data.length === 0) {
-        Alert.alert("No Results", "No service history found for this phone number.");
+      try {
+        const response = await fetch(`http://localhost:5000/api/booking/search/${email}`); // Use email to fetch data
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch services");
+        }
+
+        const data = await response.json();
+
+        if (data.length === 0) {
+          Alert.alert("No Results", "No service history found for this email.");
+        }
+
+        setFilteredServices(data);
+      } catch (err) {
+        console.error("Error fetching data:", err);
+        setError("Error fetching service data");
+      } finally {
+        setLoading(false);
       }
+    };
 
-      setFilteredServices(data);
-    } catch (err) {
-      console.error("Error fetching data:", err);
-      setError("Error fetching service data");
-    } finally {
-      setLoading(false);
-    }
-  };
+    fetchData();
+  }, []);
 
   // Function to get status color
   const getStatusColor = (status: string) => {
@@ -70,15 +75,6 @@ export default function TrackService() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Track Your Services</Text>
-
-      <TextInput
-        style={styles.searchInput}
-        placeholder="Enter phone number"
-        value={searchTerm}
-        onChangeText={setSearchTerm}
-      />
-
-      <Button title="Search" onPress={handleSearch} disabled={loading} />
 
       {loading && <Text style={styles.loadingText}>Loading...</Text>}
       {error && <Text style={styles.errorText}>{error}</Text>}
@@ -115,9 +111,7 @@ export default function TrackService() {
                   </Text>
 
                   <Text style={styles.label}>Status:</Text>
-                  <Text style={[styles.status, { color: getStatusColor(item.status) }]}>
-                    {item.status}
-                  </Text>
+                  <Text style={[styles.status, { color: getStatusColor(item.status) }]}>{item.status}</Text>
                 </View>
               </Card.Content>
             </Card>
@@ -166,14 +160,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "bold",
   },
-  searchInput: {
-    height: 40,
-    borderColor: "#ccc",
-    borderWidth: 1,
-    borderRadius: 8,
-    marginBottom: 10,
-    paddingLeft: 10,
-  },
   noResults: {
     fontSize: 16,
     color: "#666",
@@ -193,4 +179,3 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
 });
-
