@@ -26,16 +26,19 @@ export default function ServiceCenters() {
                 icon="pencil"
                 size={20}
                 onPress={() => console.log("Edit Center", item.id)}
+                iconColor="#1E90FF"
               />
               <IconButton
                 icon="delete"
                 size={20}
                 onPress={() => console.log("Delete Center", item.id)}
+                iconColor="red"
               />
               <IconButton
                 icon="map-marker"
                 size={20}
                 onPress={() => console.log("View on Map", item.id)}
+                iconColor="green"
               />
             </Card.Actions>
           </Card>
@@ -83,11 +86,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#666",
     marginTop: 4,
-  },
+  },                
+
   button: {
     marginTop: 20,
     borderRadius: 8,
-    backgroundColor: "#6200ee",
+    backgroundColor: "#1E90FF",
     paddingVertical: 8,
   },
   buttonLabel: {

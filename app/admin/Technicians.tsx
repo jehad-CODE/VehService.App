@@ -28,17 +28,15 @@ export default function AdminTechnicians() {
                 icon="pencil"
                 size={20}
                 onPress={() => console.log("Edit Technician", item.id)}
+                iconColor="#1E90FF"
               />
               <IconButton
                 icon="delete"
                 size={20}
                 onPress={() => console.log("Delete Technician", item.id)}
+                iconColor="red"
               />
-              <IconButton
-                icon="calendar-check"
-                size={20}
-                onPress={() => console.log("Assign Technician", item.id)}
-              />
+            
             </Card.Actions>
           </Card>
         )}
@@ -89,7 +87,7 @@ const styles = StyleSheet.create({
   button: {
     marginTop: 20,
     borderRadius: 8,
-    backgroundColor: "#6200ee",
+    backgroundColor: "#1E90FF",
     paddingVertical: 8,
   },
   buttonLabel: {

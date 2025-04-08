@@ -89,7 +89,6 @@ app.post("/api/booking", async (req, res) => {
       bookingType,
       note,
       branch,
-      // Do NOT need to explicitly set the 'status' since it's automatically set to 'pending'
     });
 
     await newBooking.save();
@@ -120,6 +119,63 @@ app.get("/api/booking/search/:email", async (req, res) => {
   } catch (error) {
     console.error("Error fetching service history:", error);
     return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+
+//* ---------------------- Admin get ---------------------- */
+app.get("/api/admin/bookings", async (req, res) => {
+  try {
+   
+    const bookings = await Booking.find(); // Fetch all bookings from the database
+    res.status(200).json(bookings);
+  } catch (error) {
+    console.error("Error fetching bookings:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+
+// Edit booking by email
+app.put("/api/admin/edit/bookings/:email", async (req, res) => {
+  const { email } = req.params; // Extract the email from the URL
+  const { customer, phoneNumber, car, date, time, bookingType, note, branch, status } = req.body; // Get the updated data from the request body
+
+  try {
+    // Find the booking by the user's email
+    const updatedBooking = await Booking.findOneAndUpdate(
+      { email }, // Match by email
+      { customer, phoneNumber, car, date, time, bookingType, note, branch, status }, // Updated data
+      { new: true } // Return the updated booking
+    );
+
+    if (!updatedBooking) {
+      return res.status(404).json({ message: "Booking not found for this email." });
+    }
+
+    res.status(200).json({ message: "Booking updated successfully", booking: updatedBooking });
+  } catch (error) {
+    console.error("Error updating booking:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// Delete booking by email
+app.delete("/api/admin/delete/bookings/:email", async (req, res) => {
+  const { email } = req.params; // Extract the email from the URL
+
+  try {
+    // Find and delete the booking by the user's email
+    const deletedBooking = await Booking.findOneAndDelete({ email });
+
+    if (!deletedBooking) {
+      return res.status(404).json({ message: "Booking not found for this email." });
+    }
+
+    res.status(200).json({ message: "Booking deleted successfully", booking: deletedBooking });
+  } catch (error) {
+    console.error("Error deleting booking:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 

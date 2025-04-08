@@ -24,20 +24,17 @@ export default function Billing() {
               <Text style={styles.invoiceDetails}>Amount: {item.amount}</Text>
             </Card.Content>
             <Card.Actions>
-              <IconButton
-                icon="download"
-                size={20}
-                onPress={() => console.log("Download Invoice", item.id)}
+             <IconButton
+              icon="pencil"
+              size={20}
+              onPress={() => console.log("Edit Appointment", item.id)}
+              iconColor="#1E90FF" // Use iconColor instead of color
               />
               <IconButton
-                icon="delete"
-                size={20}
-                onPress={() => console.log("Delete Invoice", item.id)}
-              />
-              <IconButton
-                icon="pencil"
-                size={20}
-                onPress={() => console.log("Edit Invoice", item.id)}
+              icon="delete"
+              size={20}
+              onPress={() => console.log("Delete Appointment", item.id)}
+              iconColor="red" // Use iconColor instead of color
               />
             </Card.Actions>
           </Card>

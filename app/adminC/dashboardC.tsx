@@ -2,6 +2,7 @@ import React from "react";
 import { View, StyleSheet, Text, ImageBackground, Dimensions, ScrollView } from "react-native";
 import { Button, Card, Avatar } from "react-native-paper";
 import { useRouter } from "expo-router";
+import { MaterialCommunityIcons } from "@expo/vector-icons"; // Importing icons
 
 const { width, height } = Dimensions.get("window");
 
@@ -20,7 +21,7 @@ export default function AdminHome() {
   };
 
   const navigateToAppointments = () => {
-    router.push("/admin/appointments");
+    router.push("/adminC/NorthBranchAppointments");
   };
 
   const navigateToInventory = () => {
@@ -37,12 +38,12 @@ export default function AdminHome() {
 
   return (
     <ImageBackground
-      source={require("@/assets/images/admin-dashboard.jpg")}
+      source={require("@/assets/images/adminB-dashboardC.jpg")}
       style={styles.backgroundImage}
       resizeMode="cover"
     >
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>Welcome, Admin!</Text>
+        <Text style={styles.title}>Welcome, AdminC!</Text>
 
         <View style={styles.cardContainer}>
           {/* Service Centers Card */}
@@ -77,38 +78,6 @@ export default function AdminHome() {
             </View>
           </Card>
 
-          {/* Inventory Card */}
-          <Card style={styles.card}>
-            <View style={styles.cardContent}>
-              <Avatar.Icon size={width * 0.1} icon="package-variant" style={styles.cardIcon} />
-              <Button
-                mode="contained"
-                onPress={navigateToInventory}
-                style={styles.cardButton}
-                labelStyle={styles.buttonText}
-                contentStyle={styles.buttonContent}
-              >
-                Inventory
-              </Button>
-            </View>
-          </Card>
-
-          {/* Technicians Card */}
-          <Card style={styles.card}>
-            <View style={styles.cardContent}>
-              <Avatar.Icon size={width * 0.1} icon="account-wrench" style={styles.cardIcon} />
-              <Button
-                mode="contained"
-                onPress={navigateToTechnicians}
-                style={styles.cardButton}
-                labelStyle={styles.buttonText}
-                contentStyle={styles.buttonContent}
-              >
-                Technicians
-              </Button>
-            </View>
-          </Card>
-
           {/* Billing Card */}
           <Card style={styles.card}>
             <View style={styles.cardContent}>
@@ -125,16 +94,17 @@ export default function AdminHome() {
             </View>
           </Card>
         </View>
+      </ScrollView>
 
-        {/* Sign-Out Button at the Bottom of the Scroll */}
+      <View style={styles.fabContainer}>
         <Button
           mode="contained"
           onPress={signOut}
-          style={styles.signOutButton} // Apply red button style
+          style={styles.fabButton}
         >
-          Sign Out
+          <MaterialCommunityIcons name="exit-to-app" size={30} color="white" />
         </Button>
-      </ScrollView>
+      </View>
     </ImageBackground>
   );
 }
@@ -149,17 +119,16 @@ const styles = StyleSheet.create({
     resizeMode: "cover",
   },
   container: {
-    justifyContent: "center",
+    justifyContent: "flex-start", // Align content from the top
     alignItems: "center",
     paddingHorizontal: 20,
-    borderRadius: 15,
     width: "100%",
     paddingBottom: 40,
   },
   title: {
-    fontSize: width * 0.07, // Making the title responsive
+    fontSize: width * 0.07,
     fontWeight: "bold",
-    color: "#fff",
+    color: "black",
     marginBottom: 15,
     textAlign: "center",
   },
@@ -167,12 +136,15 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     width: "100%",
     paddingBottom: 15,
+    height: height * 0.5, // Adjust height to take half of the screen
+    justifyContent: "flex-start", // Ensure the cards are placed at the top of the container
+    marginTop: height * 0.1, // Add margin-top to move the cards down a bit
   },
   card: {
     width: width * 0.85,
     marginVertical: 8,
     padding: 15,
-    backgroundColor: "rgba(255, 255, 255, 0.3)",
+    backgroundColor: "rgba(0, 0, 0, 0.68)",
     borderRadius: 12,
     elevation: 4,
     alignItems: "center",
@@ -194,25 +166,31 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   cardButton: {
-    width: width * 0.45, // Same width as on customer side
+    width: width * 0.45,
     paddingVertical: 10,
     borderRadius: 18,
     backgroundColor: "#1E88E5",
   },
   buttonText: {
-    fontSize: width * 0.035, // Adjust font size to be consistent
+    fontSize: width * 0.035,
     fontWeight: "bold",
     textAlign: "center",
   },
   buttonContent: {
     justifyContent: "center",
   },
-  signOutButton: {
-    backgroundColor: "#D32F2F", // Red button for Sign Out
-    borderRadius: 12,
-    paddingVertical: 10,
-    width: width * 0.50, 
-    alignSelf: "center",
-    marginTop: 20, // Give it some spacing before the button
+  fabContainer: {
+    position: "absolute",
+    bottom: 30,
+    right: 20,
+    zIndex: 1,
+  },
+  fabButton: {
+    backgroundColor: "#D32F2F",
+    borderRadius: 50,
+    width: 60,
+    height: 60,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

@@ -59,9 +59,15 @@ export default function SignInScreen() {
         router.push("/admin/dashboard");
       } else if (user.role === "customer") {
         router.push("/customer/home");
-      } else {
+      }else if (user.role === "adminB") {
+        router.push("/adminB/dashboardB");
+      }else if (user.role === "adminC") {
+        router.push("/adminC/dashboardC");
+      }
+      else {
         Alert.alert("Error", "Invalid user role.");
       }
+      
 
       Alert.alert("Success", "Sign-in successful!");
     } catch (error) {

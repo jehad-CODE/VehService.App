@@ -27,11 +27,14 @@ export default function InventoryScreen() {
                 icon="pencil"
                 size={20}
                 onPress={() => console.log("Edit Item", item.id)}
+                iconColor="#1E90FF"
               />
               <IconButton
                 icon="delete"
                 size={20}
                 onPress={() => console.log("Delete Item", item.id)}
+                iconColor="red"
+
               />
             </Card.Actions>
           </Card>
@@ -83,7 +86,7 @@ const styles = StyleSheet.create({
   button: {
     marginTop: 20,
     borderRadius: 8,
-    backgroundColor: "#6200ee",
+    backgroundColor: "#1E90FF",
     paddingVertical: 8,
   },
   buttonLabel: {
