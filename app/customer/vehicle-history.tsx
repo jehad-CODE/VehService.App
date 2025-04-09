@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { View, StyleSheet, FlatList, Text, Alert } from "react-native";
 import { Card } from "react-native-paper";
-import AsyncStorage from "@react-native-async-storage/async-storage"; // Import AsyncStorage
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// Define the Type for serviceTracking data
 interface Service {
   id: string;
   customer: string;
@@ -12,7 +11,7 @@ interface Service {
   date: string;
   time: string;
   note?: string;
-  status: string; // New field for status
+  status: string;
 }
 
 export default function ViewHistory() {
@@ -22,7 +21,7 @@ export default function ViewHistory() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const email = await AsyncStorage.getItem("userEmail"); // Get email from AsyncStorage
+      const email = await AsyncStorage.getItem("userEmail");
       if (!email) {
         Alert.alert("Error", "No email found. Please sign in.");
         return;
@@ -32,7 +31,7 @@ export default function ViewHistory() {
       setError(null);
 
       try {
-        const response = await fetch(`http://localhost:5000/api/booking/search/${email}`); // Use email to fetch data
+        const response = await fetch(`http://localhost:5000/api/booking/search/${email}`);
 
         if (!response.ok) {
           throw new Error("Failed to fetch services");
@@ -54,23 +53,7 @@ export default function ViewHistory() {
     };
 
     fetchData();
-  }, []); // The effect runs once when the component is mounted
-
-  // Function to get status color
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "pending":
-        return "#FFA500"; // Orange
-      case "in progress":
-        return "#1E90FF"; // Blue
-      case "approved":
-        return "#008000"; // Green
-      case "cancelled":
-        return "#FF0000"; // Red
-      default:
-        return "#000"; // Black (default)
-    }
-  };
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -85,34 +68,56 @@ export default function ViewHistory() {
         <FlatList
           data={filteredServices}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <Card style={styles.card}>
-              <Card.Content>
-                <View style={styles.serviceDetails}>
-                  <Text style={styles.label}>Username:</Text>
-                  <Text style={styles.value}>{item.customer}</Text>
+          renderItem={({ item }) => {
+            const lastServiceDate = new Date(item.date);
+            const nextServiceDate = new Date(lastServiceDate);
+            nextServiceDate.setMonth(lastServiceDate.getMonth() + 3);
 
-                  <Text style={styles.label}>Car:</Text>
-                  <Text style={styles.value}>{item.car}</Text>
+            const today = new Date();
+            const timeDiff = nextServiceDate.getTime() - today.getTime();
+            const daysRemaining = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+            const isDueSoon = daysRemaining <= 7;
 
-                  <Text style={styles.label}>Service Type:</Text>
-                  <Text style={styles.value}>{item.bookingType}</Text>
+            return (
+              <Card style={styles.card}>
+                <Card.Content>
+                  <View style={styles.serviceDetails}>
+                    <Text style={styles.label}>Username:</Text>
+                    <Text style={styles.value}>{item.customer}</Text>
 
-                  {item.note && (
-                    <>
-                      <Text style={styles.label}>Note:</Text>
-                      <Text style={styles.value}>{item.note}</Text>
-                    </>
-                  )}
+                    <Text style={styles.label}>Car:</Text>
+                    <Text style={styles.value}>{item.car}</Text>
 
-                  <Text style={styles.label}>Date:</Text>
-                  <Text style={styles.value}>
-                    {new Date(item.date).toLocaleDateString()} at {item.time}
-                  </Text>
-                </View>
-              </Card.Content>
-            </Card>
-          )}
+                    <Text style={styles.label}>Service Type:</Text>
+                    <Text style={styles.value}>{item.bookingType}</Text>
+
+                    {item.note && (
+                      <>
+                        <Text style={styles.label}>Note:</Text>
+                        <Text style={styles.value}>{item.note}</Text>
+                      </>
+                    )}
+
+                    <Text style={styles.label}>Date:</Text>
+                    <Text style={styles.value}>
+                      {lastServiceDate.toLocaleDateString()} at {item.time}
+                    </Text>
+
+                    <Text style={styles.label}>Next Recommended Service:</Text>
+                    <Text
+                      style={[
+                        styles.value,
+                        isDueSoon ? styles.dueSoonText : styles.normalText,
+                      ]}
+                    >
+                      {nextServiceDate.toLocaleDateString()}
+                      {isDueSoon ? " (Due Soon)" : ""}
+                    </Text>
+                  </View>
+                </Card.Content>
+              </Card>
+            );
+          }}
         />
       )}
     </View>
@@ -153,10 +158,6 @@ const styles = StyleSheet.create({
     color: "#222",
     marginBottom: 4,
   },
-  status: {
-    fontSize: 14,
-    fontWeight: "bold",
-  },
   noResults: {
     fontSize: 16,
     color: "#666",
@@ -174,5 +175,12 @@ const styles = StyleSheet.create({
     color: "red",
     textAlign: "center",
     marginTop: 20,
+  },
+  dueSoonText: {
+    color: "red",
+    fontWeight: "bold",
+  },
+  normalText: {
+    color: "#222",
   },
 });

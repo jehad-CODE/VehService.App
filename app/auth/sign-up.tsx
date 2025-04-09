@@ -13,6 +13,7 @@ import {
   Text,
   TextInput,
   Button,
+  Checkbox,
   DefaultTheme,
   Provider as PaperProvider,
 } from "react-native-paper";
@@ -35,6 +36,7 @@ export default function SignUpScreen() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false); // New state
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -52,12 +54,15 @@ export default function SignUpScreen() {
       return;
     }
 
+    const role = isAdmin ? "admin" : "customer";
+
     setLoading(true);
     try {
       const response = await axios.post("http://localhost:5000/api/auth/signup", {
         username,
         email,
         password,
+        role,
       });
 
       if (response.data.message === "User registered successfully") {
@@ -125,6 +130,15 @@ export default function SignUpScreen() {
                 style={styles.input}
                 theme={theme}
               />
+
+              {/* Admin checkbox */}
+              <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 10}}>
+                <Checkbox
+                  status={isAdmin ? "checked" : "unchecked"}
+                  onPress={() => setIsAdmin(!isAdmin)}
+                />
+                <Text>Register as Admin</Text>
+              </View>
 
               <Button
                 mode="contained"

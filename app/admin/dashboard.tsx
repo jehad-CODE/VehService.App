@@ -34,6 +34,9 @@ export default function AdminHome() {
   const navigateToBilling = () => {
     router.push("/admin/Billing");
   };
+  const navigateToAdminsReqs= () => {
+    router.push("/admin/AdminsRequests");
+  };
 
   return (
     <ImageBackground
@@ -42,7 +45,7 @@ export default function AdminHome() {
       resizeMode="cover"
     >
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>Welcome, Admin!</Text>
+        <Text style={styles.title}>Welcome, Super Admin!</Text>
 
         <View style={styles.cardContainer}>
           {/* Service Centers Card */}
@@ -108,7 +111,7 @@ export default function AdminHome() {
               </Button>
             </View>
           </Card>
-
+          
           {/* Billing Card */}
           <Card style={styles.card}>
             <View style={styles.cardContent}>
@@ -121,6 +124,21 @@ export default function AdminHome() {
                 contentStyle={styles.buttonContent}
               >
                 Billing
+              </Button>
+            </View>
+          </Card>
+        {/* Admin Req  */}
+        <Card style={styles.card}>
+            <View style={styles.cardContent}>
+              <Avatar.Icon size={width * 0.1} icon="clipboard-account" style={styles.cardIcon} />
+              <Button
+                mode="contained"
+                onPress={navigateToAdminsReqs}
+                style={styles.cardButton}
+                labelStyle={styles.buttonText}
+                contentStyle={styles.buttonContent}
+              >
+                Admins requests 
               </Button>
             </View>
           </Card>
