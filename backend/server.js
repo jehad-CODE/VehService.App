@@ -1,8 +1,10 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-const User = require("./models/User"); // User model for registration and login
-const Booking = require("./models/booking"); // Import Booking model
+
+const User = require("./models/User");
+const Booking = require("./models/booking");
+const AdminRequest = require("./models/AdminRequest");
 
 const app = express();
 
@@ -16,34 +18,28 @@ mongoose
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
-  .then(() => {
-    console.log("Connected to MongoDB");
-  })
-  .catch((error) => {
-    console.error("Error connecting to MongoDB:", error);
-  });
+  .then(() => console.log("Connected to MongoDB"))
+  .catch((error) => console.error("MongoDB connection error:", error));
 
-/* ----------------------------- SIGN UP ROUTE ----------------------------- */
+// ------------------- Regular User Signup -------------------
 app.post("/api/auth/signup", async (req, res) => {
   const { username, email, password } = req.body;
 
   try {
     const userExists = await User.findOne({ email });
-    if (userExists) {
-      return res.status(400).json({ message: "User already exists" });
-    }
+    if (userExists) return res.status(400).json({ message: "User already exists" });
 
     const newUser = new User({ username, email, password });
     await newUser.save();
 
-    res.status(201).json({ message: "User registered successfully", user: newUser });
+    res.status(201).json({ message: "User registered", user: newUser });
   } catch (error) {
-    console.error("Error registering user:", error);
+    console.error("Signup error:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });
 
-/* ----------------------------- SIGN IN ROUTE ----------------------------- */
+// ------------------- Regular User Signin -------------------
 app.post("/api/auth/signin", async (req, res) => {
   const { email, password } = req.body;
 
@@ -60,23 +56,85 @@ app.post("/api/auth/signin", async (req, res) => {
         id: user._id,
         username: user.username,
         email: user.email,
-        role: user.role, // Include the role in the login response
+        role: user.role,
       },
     });
   } catch (error) {
-    console.error("Error logging in user:", error);
+    console.error("Signin error:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });
 
+// ------------------- Admin Signup Request -------------------
+app.post("/api/admin/request", async (req, res) => {
+  const { username, email, password } = req.body;
 
-/* ----------------------------- BOOKING ROUTE ----------------------------- */
+  try {
+    const existingRequest = await AdminRequest.findOne({ email });
+    if (existingRequest) {
+      return res.status(400).json({ message: "Request already exists" });
+    }
+
+    const newRequest = new AdminRequest({ username, email, password });
+    await newRequest.save();
+
+    res.status(201).json({ message: "Admin signup request submitted" });
+  } catch (error) {
+    console.error("Admin request error:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// ------------------- Super Admin: View All Requests -------------------
+app.get("/api/superadmin/requests", async (req, res) => {
+  try {
+    const requests = await AdminRequest.find({ status: "pending" });
+    res.status(200).json(requests);
+  } catch (error) {
+    console.error("Fetching admin requests failed:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// ------------------- Super Admin: Approve or Reject Request -------------------
+app.put("/api/superadmin/requests/:id", async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  if (!["approved", "rejected"].includes(status)) {
+    return res.status(400).json({ message: "Invalid status value" });
+  }
+
+  try {
+    const request = await AdminRequest.findById(id);
+    if (!request) return res.status(404).json({ message: "Request not found" });
+
+    request.status = status;
+    await request.save();
+
+    if (status === "approved") {
+      // Create user account for approved admin
+      const newAdmin = new User({
+        username: request.username,
+        email: request.email,
+        password: request.password,
+        role: "admin",
+      });
+      await newAdmin.save();
+    }
+
+    res.status(200).json({ message: `Request ${status}`, request });
+  } catch (error) {
+    console.error("Updating request failed:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// ------------------- Booking Routes -------------------
 app.post("/api/booking", async (req, res) => {
   const { customer, email, phoneNumber, car, date, time, bookingType, note, branch } = req.body;
 
-  if (!email) {
-    return res.status(400).json({ message: "Email is required." });
-  }
+  if (!email) return res.status(400).json({ message: "Email is required." });
 
   try {
     const newBooking = new Booking({
@@ -93,97 +151,70 @@ app.post("/api/booking", async (req, res) => {
 
     await newBooking.save();
 
-    res.status(201).json({
-      message: "Booking successful",
-      booking: newBooking, // The status should appear in the response here
-    });
+    res.status(201).json({ message: "Booking successful", booking: newBooking });
   } catch (error) {
-    console.error("Error booking appointment:", error);
+    console.error("Booking error:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });
 
-//* ---------------------- SEARCH BOOKING BY USER EMAIL ---------------------- */
 app.get("/api/booking/search/:email", async (req, res) => {
   const { email } = req.params;
 
   try {
-    // Search bookings by email, not phone number
     const bookings = await Booking.find({ email });
 
-    if (bookings.length > 0) {
-      return res.status(200).json(bookings);
-    } else {
-      return res.status(404).json({ message: "No service history found for this email." });
+    if (bookings.length === 0) {
+      return res.status(404).json({ message: "No bookings found." });
     }
-  } catch (error) {
-    console.error("Error fetching service history:", error);
-    return res.status(500).json({ message: "Internal server error" });
-  }
-});
 
-
-//* ---------------------- Admin get ---------------------- */
-app.get("/api/admin/bookings", async (req, res) => {
-  try {
-   
-    const bookings = await Booking.find(); // Fetch all bookings from the database
     res.status(200).json(bookings);
   } catch (error) {
-    console.error("Error fetching bookings:", error);
+    console.error("Booking search error:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });
 
+// Admin GET, EDIT, DELETE
+app.get("/api/admin/bookings", async (req, res) => {
+  try {
+    const bookings = await Booking.find();
+    res.status(200).json(bookings);
+  } catch (error) {
+    console.error("Get bookings error:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
 
-// Edit booking by email
 app.put("/api/admin/edit/bookings/:email", async (req, res) => {
-  const { email } = req.params; // Extract the email from the URL
-  const { customer, phoneNumber, car, date, time, bookingType, note, branch, status } = req.body; // Get the updated data from the request body
+  const { email } = req.params;
+  const update = req.body;
 
   try {
-    // Find the booking by the user's email
-    const updatedBooking = await Booking.findOneAndUpdate(
-      { email }, // Match by email
-      { customer, phoneNumber, car, date, time, bookingType, note, branch, status }, // Updated data
-      { new: true } // Return the updated booking
-    );
+    const updatedBooking = await Booking.findOneAndUpdate({ email }, update, { new: true });
+    if (!updatedBooking) return res.status(404).json({ message: "Booking not found." });
 
-    if (!updatedBooking) {
-      return res.status(404).json({ message: "Booking not found for this email." });
-    }
-
-    res.status(200).json({ message: "Booking updated successfully", booking: updatedBooking });
+    res.status(200).json({ message: "Booking updated", booking: updatedBooking });
   } catch (error) {
-    console.error("Error updating booking:", error);
+    console.error("Edit booking error:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });
 
-// Delete booking by email
 app.delete("/api/admin/delete/bookings/:email", async (req, res) => {
-  const { email } = req.params; // Extract the email from the URL
+  const { email } = req.params;
 
   try {
-    // Find and delete the booking by the user's email
     const deletedBooking = await Booking.findOneAndDelete({ email });
+    if (!deletedBooking) return res.status(404).json({ message: "Booking not found." });
 
-    if (!deletedBooking) {
-      return res.status(404).json({ message: "Booking not found for this email." });
-    }
-
-    res.status(200).json({ message: "Booking deleted successfully", booking: deletedBooking });
+    res.status(200).json({ message: "Booking deleted", booking: deletedBooking });
   } catch (error) {
-    console.error("Error deleting booking:", error);
+    console.error("Delete booking error:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });
 
-
-/* ----------------------------- START SERVER ----------------------------- */
+// Start server
 const port = 5000;
-app.listen(port, () => {
-  console.log(`Server running on http://localhost:${port}`);
-});
-
-  
+app.listen(port, () => console.log(`Server running at http://localhost:${port}`));

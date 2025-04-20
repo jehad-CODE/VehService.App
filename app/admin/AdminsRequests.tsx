@@ -1,47 +1,108 @@
-import React from "react";
-import { View, StyleSheet, FlatList } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, StyleSheet, FlatList, Alert } from "react-native";
 import { Button, Card, Text, IconButton } from "react-native-paper";
+import axios from "axios";
 
-const adminRequests = [
-  { id: "1", username: "adminOne", email: "admin1@example.com" },
-  { id: "2", username: "adminTwo", email: "admin2@example.com" },
-  { id: "3", username: "adminThree", email: "admin3@example.com" },
-];
+// Define the type for AdminRequest
+interface AdminRequest {
+  id: string;
+  username: string;
+  email: string;
+  status: string;  // Add status field for tracking request approval
+}
 
 export default function AdminRequests() {
+  const [adminRequests, setAdminRequests] = useState<AdminRequest[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Fetch admin requests from the API
+    const fetchAdminRequests = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/superadmin/requests");
+        setAdminRequests(response.data);  // Assuming the API response contains the requests array
+      } catch (error) {
+        Alert.alert("Error", "Failed to fetch admin requests.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAdminRequests();
+  }, []);
+
+  // Handle edit (approve) request
+  const handleApprove = async (id: string) => {
+    try {
+      const response = await axios.patch(`http://localhost:5000/api/superadmin/requests/${id}`, {
+        status: 'approved',
+      });
+      setAdminRequests(prevState =>
+        prevState.map(request =>
+          request.id === id ? { ...request, status: 'approved' } : request
+        )
+      );
+      Alert.alert("Success", "Request approved.");
+    } catch (error) {
+      Alert.alert("Error", "Failed to approve the request.");
+    }
+  };
+
+  // Handle delete (reject) request
+  const handleReject = async (id: string) => {
+    try {
+      await axios.delete(`http://localhost:5000/api/superadmin/requests/${id}`);
+      setAdminRequests(prevState =>
+        prevState.filter(request => request.id !== id)
+      );
+      Alert.alert("Success", "Request rejected.");
+    } catch (error) {
+      Alert.alert("Error", "Failed to reject the request.");
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Pending Admin Requests</Text>
 
-      <FlatList
-        data={adminRequests}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <Card style={styles.card}>
-            <Card.Content>
-              <Text style={styles.textLabel}>Username:</Text>
-              <Text style={styles.textValue}>{item.username}</Text>
+      {loading ? (
+        <Text>Loading...</Text>
+      ) : (
+        <FlatList
+          data={adminRequests}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <Card style={styles.card}>
+              <Card.Content>
+                <Text style={styles.textLabel}>Username:</Text>
+                <Text style={styles.textValue}>{item.username}</Text>
 
-              <Text style={styles.textLabel}>Email:</Text>
-              <Text style={styles.textValue}>{item.email}</Text>
-            </Card.Content>
-            <Card.Actions>
-              <IconButton
-                icon="pencil"
-                size={20}
-                onPress={() => console.log("Edit Admin", item.id)}
-                iconColor="#1E90FF"
-              />
-              <IconButton
-                icon="delete"
-                size={20}
-                onPress={() => console.log("Delete Admin", item.id)}
-                iconColor="red"
-              />
-            </Card.Actions>
-          </Card>
-        )}
-      />
+                <Text style={styles.textLabel}>Email:</Text>
+                <Text style={styles.textValue}>{item.email}</Text>
+
+                <Text style={styles.textLabel}>Status:</Text>
+                <Text style={styles.textValue}>{item.status}</Text>
+              </Card.Content>
+              <Card.Actions>
+                {item.status !== "approved" && (
+                  <IconButton
+                    icon="check"
+                    size={20}
+                    onPress={() => handleApprove(item.id)}  // Approve the request
+                    iconColor="green"
+                  />
+                )}
+                <IconButton
+                  icon="delete"
+                  size={20}
+                  onPress={() => handleReject(item.id)}  // Reject the request
+                  iconColor="red"
+                />
+              </Card.Actions>
+            </Card>
+          )}
+        />
+      )}
 
       <Button
         mode="contained"

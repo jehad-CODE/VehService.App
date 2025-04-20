@@ -30,7 +30,7 @@ const theme = {
   },
 };
 
-export default function SignUpScreen() {
+export default function AdminSignUp() {
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -38,7 +38,7 @@ export default function SignUpScreen() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleSignUp = async () => {
+  const handleAdminRequest = async () => {
     if (!email || !username || !password || !confirmPassword) {
       Alert.alert("Error", "All fields are required!");
       return;
@@ -52,22 +52,19 @@ export default function SignUpScreen() {
       return;
     }
 
-    const role = "customer"; // Always customer here
-
     setLoading(true);
     try {
-      const response = await axios.post("http://localhost:5000/api/auth/signup", {
+      const response = await axios.post("http://localhost:5000/api/admin/request", {
         username,
         email,
         password,
-        role,
       });
 
-      if (response.data.message === "User registered successfully") {
-        Alert.alert("Success", "Account created successfully!");
+      if (response.status === 201) {
+        Alert.alert("Success", "Admin request submitted successfully!");
         router.push("/auth/sign-in");
       } else {
-        Alert.alert("Error", response.data.message || "Registration failed.");
+        Alert.alert("Error", response.data.message || "Request failed.");
       }
     } catch (error) {
       Alert.alert("Error", "An unexpected error occurred.");
@@ -89,7 +86,7 @@ export default function SignUpScreen() {
         >
           <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
             <View style={[styles.innerContainer, { width: width * 0.85 }]}>
-              <Text style={styles.title}>Sign Up</Text>
+              <Text style={styles.title}>Garage owner Request</Text>
 
               <TextInput
                 label="Username"
@@ -132,28 +129,23 @@ export default function SignUpScreen() {
                 theme={theme}
               />
 
-              {/* Button to register as Admin */}
-              <Button
-                mode="outlined"
-                onPress={() => router.push("/auth/admin-sign-up")}
-                style={styles.adminButton}
-                labelStyle={{ color: "#007bff" }}
-              >
-              Register as a Garage owner
-              </Button>
-
               <Button
                 mode="contained"
-                onPress={handleSignUp}
+                onPress={handleAdminRequest}
                 style={styles.button}
                 contentStyle={styles.buttonContent}
                 disabled={loading}
               >
-                {loading ? "Signing Up..." : "Sign Up"}
+                {loading ? "Submitting..." : "Submit Request"}
               </Button>
 
-              <Button mode="text" onPress={() => router.push("/auth/sign-in")} style={styles.signInButton}>
-                Already have an account? <Text style={styles.signInText}>Sign In</Text>
+              <Button
+                mode="text"
+                onPress={() => router.push("/auth/sign-up")}
+                style={styles.signInButton}
+              >
+                Want to register as a Customer?{" "}
+                <Text style={styles.signInText}>Go to Sign Up</Text>
               </Button>
             </View>
           </ScrollView>
@@ -183,10 +175,4 @@ const styles = StyleSheet.create({
   buttonContent: { paddingVertical: 10 },
   signInButton: { marginTop: 10, alignSelf: "center" },
   signInText: { color: "#007bff", fontWeight: "bold" },
-  adminButton: {
-    marginTop: 10,
-    borderColor: "#007bff",
-    borderWidth: 1,
-    borderRadius: 8,
-  },
 });

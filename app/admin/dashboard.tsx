@@ -212,13 +212,13 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   cardButton: {
-    width: width * 0.45, // Same width as on customer side
+    width: width * 0.45,
     paddingVertical: 10,
     borderRadius: 18,
     backgroundColor: "#1E88E5",
   },
   buttonText: {
-    fontSize: width * 0.035, // Adjust font size to be consistent
+    fontSize: width * 0.035, 
     fontWeight: "bold",
     textAlign: "center",
   },
@@ -226,11 +226,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   signOutButton: {
-    backgroundColor: "#D32F2F", // Red button for Sign Out
+    backgroundColor: "#D32F2F", 
     borderRadius: 12,
     paddingVertical: 10,
     width: width * 0.50, 
     alignSelf: "center",
-    marginTop: 20, // Give it some spacing before the button
+    marginTop: 20, 
   },
 });
