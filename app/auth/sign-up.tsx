@@ -79,7 +79,7 @@ export default function SignUpScreen() {
   return (
     <PaperProvider theme={theme}>
       <ImageBackground
-        source={require("@/assets/images/login2.jpg")}
+        source={require("@/assets/images/login3.jpg")}
         style={[styles.background, { width, height }]}
         resizeMode="cover"
       >

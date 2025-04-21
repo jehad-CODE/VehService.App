@@ -138,7 +138,7 @@ export default function AdminHome() {
                 labelStyle={styles.buttonText}
                 contentStyle={styles.buttonContent}
               >
-                Admins requests 
+               Owner Requests 
               </Button>
             </View>
           </Card>
