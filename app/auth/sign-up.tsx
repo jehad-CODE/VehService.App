@@ -166,9 +166,9 @@ export default function SignUpScreen() {
 const styles = StyleSheet.create({
   background: { flex: 1, justifyContent: "center" },
   container: { flex: 1, justifyContent: "center" },
-  scrollContainer: { flexGrow: 1, justifyContent: "center", paddingHorizontal: 20 },
+  scrollContainer: { flexGrow: 1, justifyContent: "center", paddingHorizontal: 30 },
   innerContainer: {
-    backgroundColor: "rgba(255, 255, 255, 0.6)",
+    backgroundColor: "rgba(67, 64, 64, 0.35)",
     borderRadius: 12,
     padding: 20,
     shadowColor: "#000",

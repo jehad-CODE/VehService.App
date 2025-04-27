@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet, FlatList, Alert } from "react-native";
+import { View, StyleSheet, FlatList, Alert, Modal, TextInput } from "react-native";
 import { Button, Card, Text, IconButton } from "react-native-paper";
 import axios from "axios";
 
@@ -8,11 +8,16 @@ interface AdminRequest {
   username: string;
   email: string;
   status: string;
+  role: string;
 }
 
 export default function AdminRequests() {
   const [adminRequests, setAdminRequests] = useState<AdminRequest[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedRequest, setSelectedRequest] = useState<AdminRequest | null>(null);
+  const [newStatus, setNewStatus] = useState("");
+  const [newRole, setNewRole] = useState("");
+  const [modalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {
     const fetchAdminRequests = async () => {
@@ -29,17 +34,31 @@ export default function AdminRequests() {
     fetchAdminRequests();
   }, []);
 
-  const handleApprove = async (id: string) => {
+  const openEditModal = (request: AdminRequest) => {
+    setSelectedRequest(request);
+    setNewStatus(request.status);
+    setNewRole(request.role);
+    setModalVisible(true);
+  };
+
+  const handleApprove = async () => {
+    if (!selectedRequest) return;
+
     try {
-      await axios.patch(`http://localhost:5000/api/edit/superadmin/requests/${id}`, {
-        status: "approved",
+      await axios.patch(`http://localhost:5000/api/edit/superadmin/requests/${selectedRequest._id}`, {
+        status: newStatus,
+        role: newRole,
       });
       setAdminRequests(prev =>
         prev.map(request =>
-          request._id === id ? { ...request, status: "approved" } : request
+          request._id === selectedRequest._id
+            ? { ...request, status: newStatus, role: newRole }
+            : request
         )
       );
-      Alert.alert("Success", "Request approved.");
+      Alert.alert("Success", "Request approved and updated.");
+      setModalVisible(false);
+      setSelectedRequest(null);
     } catch (error) {
       Alert.alert("Error", "Failed to approve the request.");
     }
@@ -47,8 +66,14 @@ export default function AdminRequests() {
 
   const handleReject = async (id: string) => {
     try {
-      await axios.delete(`http://localhost:5000/api/delete/superadmin/requests/${id}`);
-      setAdminRequests(prev => prev.filter(request => request._id !== id));
+      await axios.patch(`http://localhost:5000/api/edit/superadmin/requests/${id}`, {
+        status: "rejected",
+      });
+      setAdminRequests(prev =>
+        prev.map(request =>
+          request._id === id ? { ...request, status: "rejected" } : request
+        )
+      );
       Alert.alert("Success", "Request rejected.");
     } catch (error) {
       Alert.alert("Error", "Failed to reject the request.");
@@ -73,19 +98,32 @@ export default function AdminRequests() {
                 <Text style={styles.textLabel}>Email:</Text>
                 <Text style={styles.textValue}>{item.email}</Text>
                 <Text style={styles.textLabel}>Status:</Text>
-                <Text style={styles.textValue}>{item.status}</Text>
+                <Text
+                  style={[
+                    styles.textValue,
+                    item.status === "approved"
+                      ? styles.approvedText
+                      : item.status === "rejected"
+                      ? styles.rejectedText
+                      : styles.pendingText,
+                  ]}
+                >
+                  {item.status}
+                </Text>
+                <Text style={styles.textLabel}>Role:</Text>
+                <Text style={styles.textValue}>{item.role}</Text>
               </Card.Content>
               <Card.Actions>
-                {item.status !== "approved" && (
+                {item.status === "pending" && (
                   <IconButton
                     icon="check"
                     size={20}
-                    onPress={() => handleApprove(item._id)}
+                    onPress={() => openEditModal(item)}
                     iconColor="green"
                   />
                 )}
                 <IconButton
-                  icon="delete"
+                  icon="close"
                   size={20}
                   onPress={() => handleReject(item._id)}
                   iconColor="red"
@@ -104,6 +142,55 @@ export default function AdminRequests() {
       >
         Add Admin
       </Button>
+
+      {/* Modal for Editing */}
+      <Modal
+        visible={modalVisible}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalBackground}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Edit Status and Role</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Status (approved/pending)"
+              value={newStatus}
+              onChangeText={setNewStatus}
+              placeholderTextColor="#888"
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Role (admina/adminb/adminc)"
+              value={newRole}
+              onChangeText={setNewRole}
+              placeholderTextColor="#888"
+            />
+            <View style={styles.modalButtons}>
+              <Button
+                mode="contained"
+                onPress={handleApprove}
+                style={[styles.modalButton, styles.confirmButton]}
+                labelStyle={{ color: "white" }}
+              >
+                Confirm
+              </Button>
+              <Button
+                mode="outlined"
+                onPress={() => {
+                  setModalVisible(false);
+                  setSelectedRequest(null);
+                }}
+                style={[styles.modalButton, styles.cancelButton]}
+                labelStyle={{ color: "#6200ee" }}
+              >
+                Cancel
+              </Button>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -123,6 +210,7 @@ const styles = StyleSheet.create({
   card: {
     marginBottom: 12,
     backgroundColor: "#fff",
+    elevation: 3,
   },
   textLabel: {
     fontWeight: "bold",
@@ -130,11 +218,67 @@ const styles = StyleSheet.create({
   textValue: {
     marginBottom: 4,
   },
+  approvedText: {
+    color: "green",
+    fontWeight: "bold",
+  },
+  rejectedText: {
+    color: "red",
+    fontWeight: "bold",
+  },
+  pendingText: {
+    color: "orange",
+    fontWeight: "bold",
+  },
   button: {
     marginTop: 16,
     backgroundColor: "#6200ee",
+    borderRadius: 8,
   },
   buttonLabel: {
     color: "white",
+    fontWeight: "bold",
+  },
+  modalBackground: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContainer: {
+    width: "85%",
+    backgroundColor: "white",
+    padding: 20,
+    borderRadius: 12,
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 16,
+    textAlign: "center",
+  },
+  input: {
+    borderWidth: 1.5,
+    borderColor: "#6200ee",
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 16,
+    color: "#000",
+  },
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  modalButton: {
+    flex: 1,
+    marginHorizontal: 6,
+    paddingVertical: 6,
+  },
+  confirmButton: {
+    backgroundColor: "#6200ee",
+  },
+  cancelButton: {
+    borderColor: "#6200ee",
   },
 });

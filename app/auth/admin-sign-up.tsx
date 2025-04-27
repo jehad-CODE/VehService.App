@@ -76,7 +76,7 @@ export default function AdminSignUp() {
   return (
     <PaperProvider theme={theme}>
       <ImageBackground
-        source={require("@/assets/images/login2.jpg")}
+        source={require("@/assets/images/login4.jpg")}
         style={[styles.background, { width, height }]}
         resizeMode="cover"
       >
@@ -158,9 +158,9 @@ export default function AdminSignUp() {
 const styles = StyleSheet.create({
   background: { flex: 1, justifyContent: "center" },
   container: { flex: 1, justifyContent: "center" },
-  scrollContainer: { flexGrow: 1, justifyContent: "center", paddingHorizontal: 20 },
+  scrollContainer: { flexGrow: 1, justifyContent: "center", paddingHorizontal: 30 },
   innerContainer: {
-    backgroundColor: "rgba(255, 255, 255, 0.6)",
+    backgroundColor: "rgba(91, 88, 88, 0.35)",
     borderRadius: 12,
     padding: 20,
     shadowColor: "#000",
@@ -173,6 +173,6 @@ const styles = StyleSheet.create({
   input: { marginBottom: 15, backgroundColor: "rgba(255, 255, 255, 0.8)" },
   button: { marginTop: 10, backgroundColor: "#007bff", borderRadius: 8 },
   buttonContent: { paddingVertical: 10 },
-  signInButton: { marginTop: 10, alignSelf: "center" },
+  signInButton: { marginTop: 25, alignSelf: "center" },
   signInText: { color: "#007bff", fontWeight: "bold" },
 });

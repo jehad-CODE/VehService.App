@@ -86,22 +86,6 @@ app.post("/api/admin/request", async (req, res) => {
 });
 
 // ------------------- Admin Request Management -------------------
-app.post("/api/admin/request", async (req, res) => {
-  const { username, email, password } = req.body;
-  try {
-    const existingRequest = await AdminRequest.findOne({ email });
-    if (existingRequest) {
-      return res.status(400).json({ message: "Request already exists" });
-    }
-    const newRequest = new AdminRequest({ username, email, password });
-    await newRequest.save();
-    res.status(201).json({ message: "Admin signup request submitted" });
-  } catch (error) {
-    console.error("Admin request error:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-});
-
 app.get("/api/superadmin/requests", async (req, res) => {
   try {
     const requests = await AdminRequest.find({ status: "pending" });
@@ -113,36 +97,33 @@ app.get("/api/superadmin/requests", async (req, res) => {
 });
 
 app.patch("/api/edit/superadmin/requests/:id", async (req, res) => {
-  const { id } = req.params;
-  const { status } = req.body;
-
-  if (!["approved", "rejected"].includes(status)) {
-    return res.status(400).json({ message: "Invalid status value" });
-  }
-
   try {
-    const request = await AdminRequest.findById(id);
-    if (!request) return res.status(404).json({ message: "Request not found" });
+    const { id } = req.params;
+    const { status, role } = req.body;
 
-    request.status = status;
-    await request.save();
-
-    if (status === "approved") {
-      const newAdmin = new User({
-        username: request.username,
-        email: request.email,
-        password: request.password,
-        role: "admin",
-      });
-      await newAdmin.save();
+    // Validate that status and role are provided
+    if (!status || !role) {
+      return res.status(400).json({ message: "Status and role are required" });
     }
 
-    res.status(200).json({ message: `Request ${status}`, request });
+    // Find and update the request
+    const updatedRequest = await AdminRequest.findByIdAndUpdate(
+      id,
+      { status, role },
+      { new: true } // Returns the updated document
+    );
+
+    if (!updatedRequest) {
+      return res.status(404).json({ message: "Request not found" });
+    }
+
+    res.json(updatedRequest); // Respond with the updated request
   } catch (error) {
-    console.error("Update error:", error);
-    res.status(500).json({ message: "Internal server error" });
+    console.error(error);
+    res.status(500).json({ message: "Error updating request" });
   }
 });
+
 
 app.delete("/api/delete/superadmin/requests/:id", async (req, res) => {
   const { id } = req.params;
@@ -157,6 +138,7 @@ app.delete("/api/delete/superadmin/requests/:id", async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
+
 // ------------------- Booking Routes -------------------
 app.post("/api/booking", async (req, res) => {
   const { customer, email, phoneNumber, car, date, time, bookingType, note, branch } = req.body;
