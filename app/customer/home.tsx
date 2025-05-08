@@ -7,7 +7,6 @@ const { width, height } = Dimensions.get("window");
 
 export default function UserHome() {
   const router = useRouter();
-  const user = { name: "Jehad" };
 
   const signOut = () => {
     // Sign-out logic here (clear tokens, redirect to login screen)
@@ -22,7 +21,7 @@ export default function UserHome() {
     >
       <View style={styles.container}>
         <ScrollView contentContainerStyle={styles.scrollContainer}>
-          <Text style={styles.title}>Welcome, {user.name}!</Text>
+          <Text style={styles.title}>Welcome!</Text>
 
           <View style={styles.cardContainer}>
             {/* Book a Service Card */}

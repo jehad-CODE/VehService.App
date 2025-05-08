@@ -1,6 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet, FlatList, Alert, Modal, TextInput } from "react-native";
+import {
+  View,
+  StyleSheet,
+  FlatList,
+  Alert,
+  Modal,
+  TextInput,
+} from "react-native";
 import { Button, Card, Text, IconButton } from "react-native-paper";
+import { Picker } from "@react-native-picker/picker";
 import axios from "axios";
 
 interface AdminRequest {
@@ -15,8 +23,8 @@ export default function AdminRequests() {
   const [adminRequests, setAdminRequests] = useState<AdminRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedRequest, setSelectedRequest] = useState<AdminRequest | null>(null);
-  const [newStatus, setNewStatus] = useState("");
-  const [newRole, setNewRole] = useState("");
+  const [newStatus, setNewStatus] = useState("pending");
+  const [newRole, setNewRole] = useState("admina");
   const [modalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {
@@ -153,20 +161,31 @@ export default function AdminRequests() {
         <View style={styles.modalBackground}>
           <View style={styles.modalContainer}>
             <Text style={styles.modalTitle}>Edit Status and Role</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Status (approved/pending)"
-              value={newStatus}
-              onChangeText={setNewStatus}
-              placeholderTextColor="#888"
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Role (admina/adminb/adminc)"
-              value={newRole}
-              onChangeText={setNewRole}
-              placeholderTextColor="#888"
-            />
+
+            <Text style={styles.textLabel}>Select Status</Text>
+            <View style={styles.pickerContainer}>
+              <Picker
+                selectedValue={newStatus}
+                onValueChange={(value) => setNewStatus(value)}
+              >
+                <Picker.Item label="Approved" value="approved" />
+                <Picker.Item label="Pending" value="pending" />
+                <Picker.Item label="Rejected" value="rejected" />
+              </Picker>
+            </View>
+
+            <Text style={styles.textLabel}>Select Role</Text>
+            <View style={styles.pickerContainer}>
+              <Picker
+                selectedValue={newRole}
+                onValueChange={(value) => setNewRole(value)}
+              >
+                <Picker.Item label="Admin A" value="admina" />
+                <Picker.Item label="Admin B" value="adminb" />
+                <Picker.Item label="Admin C" value="adminc" />
+              </Picker>
+            </View>
+
             <View style={styles.modalButtons}>
               <Button
                 mode="contained"
@@ -214,6 +233,7 @@ const styles = StyleSheet.create({
   },
   textLabel: {
     fontWeight: "bold",
+    marginTop: 6,
   },
   textValue: {
     marginBottom: 4,
@@ -232,7 +252,7 @@ const styles = StyleSheet.create({
   },
   button: {
     marginTop: 16,
-    backgroundColor: "#6200ee",
+    backgroundColor: "#1E90FF",
     borderRadius: 8,
   },
   buttonLabel: {
@@ -258,13 +278,11 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     textAlign: "center",
   },
-  input: {
+  pickerContainer: {
     borderWidth: 1.5,
     borderColor: "#6200ee",
     borderRadius: 10,
-    padding: 12,
     marginBottom: 16,
-    color: "#000",
   },
   modalButtons: {
     flexDirection: "row",

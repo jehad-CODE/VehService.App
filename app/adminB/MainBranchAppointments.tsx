@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { View, FlatList, StyleSheet, ScrollView, Alert } from "react-native";
-import { Card, Text, IconButton, Modal, Portal, Button, Provider } from "react-native-paper";
+import { View, StyleSheet, FlatList } from "react-native";
+import { Card, Text, IconButton, Modal, Button, Provider } from "react-native-paper";
 import { Picker } from "@react-native-picker/picker";
 
 interface Appointment {
@@ -20,48 +20,42 @@ export default function MainBranchAdmin() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [isModalVisible, setModalVisible] = useState(false);
   const [currentAppointment, setCurrentAppointment] = useState<Appointment | null>(null);
-  const [status, setStatus] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState<string>("");
 
   useEffect(() => {
     fetch("http://localhost:5000/api/admin/bookings")
       .then((res) => res.json())
       .then((data) => {
-        const filtered = data.filter((a: Appointment) => a.branch === "main");
+        const filtered = data.filter((a: Appointment) => a.branch.toLowerCase() === "main");
         setAppointments(filtered);
       })
       .catch((err) => console.error("Error fetching data", err));
   }, []);
 
-  const openModal = (appointment: Appointment) => {
+  const handleEdit = (appointment: Appointment) => {
     setCurrentAppointment(appointment);
-    setStatus(appointment.status);
+    setSelectedStatus(appointment.status);
     setModalVisible(true);
   };
 
-  const closeModal = () => {
-    setModalVisible(false);
-    setCurrentAppointment(null);
-  };
-
-  // Handle submitting the updated appointment details
   const handleSaveChanges = () => {
     if (currentAppointment) {
-      const updatedDetails = { ...currentAppointment, status }; // Create updatedDetails with the new status
+      const updatedAppointment = { ...currentAppointment, status: selectedStatus };
 
       fetch(`http://localhost:5000/api/admin/edit/bookings/${currentAppointment.email}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(updatedDetails),
+        body: JSON.stringify(updatedAppointment),
       })
         .then((response) => response.json())
         .then((data) => {
           console.log("Booking updated:", data);
           setAppointments(appointments.map((appt) =>
-            appt.email === currentAppointment.email ? updatedDetails : appt
+            appt.email === currentAppointment.email ? updatedAppointment : appt
           ));
-          setModalVisible(false); // Close the modal after saving changes
+          setModalVisible(false);
         })
         .catch((error) => {
           console.error("Error updating booking:", error);
@@ -69,17 +63,12 @@ export default function MainBranchAdmin() {
     }
   };
 
-  // Handle deleting a booking by email
   const handleDelete = (email: string) => {
-    console.log("Delete Appointment", email);
-
     fetch(`http://localhost:5000/api/admin/delete/bookings/${email}`, {
       method: "DELETE",
     })
       .then((response) => response.json())
-      .then((data) => {
-        console.log("Booking deleted:", data);
-        // Remove the deleted booking from the state
+      .then(() => {
         setAppointments(appointments.filter((appointment) => appointment.email !== email));
       })
       .catch((error) => {
@@ -89,79 +78,101 @@ export default function MainBranchAdmin() {
 
   return (
     <Provider>
-      <ScrollView contentContainerStyle={styles.container}>
+      <View style={styles.container}>
+        <Text style={styles.title}>Main Branch Appointments</Text>
+
         <FlatList
           data={appointments}
-          keyExtractor={(_, index) => index.toString()}
+          keyExtractor={(item) => item.email}
           renderItem={({ item }) => (
             <Card style={styles.card}>
-              <Card.Title title={item.customer} subtitle={`📧 ${item.email}`} titleStyle={styles.text} subtitleStyle={styles.text} />
               <Card.Content>
-                <Text style={styles.text}>📅 Date: {item.date}</Text>
-                <Text style={styles.text}>⏰ Time: {item.time}</Text>
-                <Text style={styles.text}>🛠️ Service: {item.bookingType}</Text>
-                <Text style={styles.text}>🏢 Branch: {item.branch}</Text>
-                <Text style={styles.text}>📞 Phone: {item.phoneNumber}</Text>
-                <Text style={styles.text}>🚗 Car: {item.car}</Text>
-                <Text style={styles.text}>📝 Note: {item.note}</Text>
-                <Text style={styles.text}>Status: <Text style={[styles.text, { fontWeight: "bold" }]}>{item.status}</Text></Text>
+                <Text style={styles.heading}>Appointment</Text>
+                <Text style={styles.details}>Customer: {item.customer}</Text>
+                <Text style={styles.details}>Email: {item.email}</Text>
+                <Text style={styles.details}>Phone: {item.phoneNumber}</Text>
+                <Text style={styles.details}>Car: {item.car}</Text>
+                <Text style={styles.details}>Date: {item.date}</Text>
+                <Text style={styles.details}>Time: {item.time}</Text>
+                <Text style={styles.details}>Service Type: {item.bookingType}</Text>
+                <Text style={styles.details}>Notes: {item.note}</Text>
+                <Text style={styles.details}>Status: {item.status}</Text>
               </Card.Content>
               <Card.Actions>
-                <IconButton icon="pencil" iconColor="#1976d2" onPress={() => openModal(item)} />
+                <IconButton icon="pencil" iconColor="#1976d2" onPress={() => handleEdit(item)} />
                 <IconButton icon="delete" iconColor="#d32f2f" onPress={() => handleDelete(item.email)} />
               </Card.Actions>
             </Card>
           )}
         />
 
-        <Portal>
-          <Modal visible={isModalVisible} onDismiss={closeModal} contentContainerStyle={styles.modal}>
-            <Text style={[styles.text, { fontSize: 18, marginBottom: 10 }]}>Update Status</Text>
-            <Picker
-              selectedValue={status}
-              onValueChange={(value) => setStatus(value)}
-              style={styles.picker}
-            >
-              <Picker.Item label="Pending" value="Pending" />
-              <Picker.Item label="approved" value="approved" />
-              <Picker.Item label="In Progress" value="In Progress" />
-              <Picker.Item label="Cancelled" value="Cancelled" />
-            </Picker>
-            <Button mode="contained" onPress={handleSaveChanges} style={{ marginTop: 10, backgroundColor:'green' }}>
-              Save
-            </Button>
-          </Modal>
-        </Portal>
-      </ScrollView>
+        <Modal visible={isModalVisible} onDismiss={() => setModalVisible(false)} contentContainerStyle={styles.modal}>
+          <Text style={styles.modalTitle}>Update Status</Text>
+          <Picker
+            selectedValue={selectedStatus}
+            onValueChange={(value) => setSelectedStatus(value)}
+            style={styles.picker}
+          >
+            <Picker.Item label="Pending" value="Pending" />
+            <Picker.Item label="Approved" value="Approved" />
+            <Picker.Item label="In Progress" value="In Progress" />
+            <Picker.Item label="Cancelled" value="Cancelled" />
+          </Picker>
+          <Button mode="contained" onPress={handleSaveChanges} style={styles.saveButton}>
+            Save
+          </Button>
+        </Modal>
+      </View>
     </Provider>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#ffffff", // White background
     padding: 16,
-    paddingBottom: 100,
+    backgroundColor: "#fff",
+    flex: 1,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: "bold",
+    marginBottom: 10,
+    color: "#333",
   },
   card: {
-    backgroundColor: "#ffffff", // White background for cards
     marginBottom: 12,
-    borderRadius: 10,
-    elevation: 5,
+    backgroundColor: "#f9f9f9",
+    borderRadius: 8,
+    elevation: 3,
+  },
+  heading: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 4,
+    color: "#000",
+  },
+  details: {
+    fontSize: 14,
+    marginBottom: 2,
+    color: "#333",
   },
   modal: {
-    backgroundColor: "#ffffff", // White background for modal
+    backgroundColor: "white",
     padding: 20,
-    marginHorizontal: 20,
+    margin: 20,
     borderRadius: 10,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
   },
   picker: {
     backgroundColor: "#f0f0f0",
-    borderRadius: 5,
-    color: "black",
+    marginBottom: 10,
   },
-  text: {
-    color: "black",
+  saveButton: {
+    backgroundColor: "green",
+    marginTop: 10,
   },
-
 });

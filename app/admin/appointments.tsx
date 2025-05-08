@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, StyleSheet, FlatList } from "react-native";
-import { Button, Card, Text, IconButton, TextInput, Modal } from "react-native-paper";
+import { Button, Card, Text, IconButton, Modal } from "react-native-paper";
 
 // Define the type for an appointment
 interface Appointment {
@@ -33,6 +33,9 @@ export default function AdminAppointments() {
     car: "",
   });
 
+  const [selectedBranch, setSelectedBranch] = useState<string>('');
+  const [selectedStatus, setSelectedStatus] = useState<string>('');
+
   // Fetch appointments from the backend API
   useEffect(() => {
     fetch("http://localhost:5000/api/admin/bookings")
@@ -49,24 +52,32 @@ export default function AdminAppointments() {
   const handleEdit = (appointment: Appointment) => {
     setCurrentAppointment(appointment);
     setUpdatedDetails(appointment);
+    setSelectedBranch(appointment.branch);
+    setSelectedStatus(appointment.status);
     setModalVisible(true); // Show the modal for editing
   };
 
   // Handle submitting the updated appointment details
   const handleSaveChanges = () => {
     if (currentAppointment) {
+      const updatedAppointment = {
+        ...updatedDetails,
+        branch: selectedBranch,
+        status: selectedStatus,
+      };
+
       fetch(`http://localhost:5000/api/admin/edit/bookings/${currentAppointment.email}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(updatedDetails),
+        body: JSON.stringify(updatedAppointment),
       })
         .then((response) => response.json())
         .then((data) => {
           console.log("Booking updated:", data);
           setAppointments(appointments.map((appt) =>
-            appt.email === currentAppointment.email ? updatedDetails : appt
+            appt.email === currentAppointment.email ? updatedAppointment : appt
           ));
           setModalVisible(false); // Close the modal after saving changes
         })
@@ -136,60 +147,33 @@ export default function AdminAppointments() {
 
       {/* Modal for editing an appointment */}
       <Modal visible={isModalVisible} onDismiss={() => setModalVisible(false)} contentContainerStyle={styles.modalContainer}>
-        <TextInput
-          label="Customer Name"
-          value={updatedDetails.customer}
-          onChangeText={(text) => setUpdatedDetails({ ...updatedDetails, customer: text })}
-        />
-        <TextInput
-          label="Email"
-          value={updatedDetails.email}
-          onChangeText={(text) => setUpdatedDetails({ ...updatedDetails, email: text })}
-        />
-        <TextInput
-          label="Phone Number"
-          value={updatedDetails.phoneNumber}
-          onChangeText={(text) => setUpdatedDetails({ ...updatedDetails, phoneNumber: text })}
-        />
-        <TextInput
-          label="Car Model"
-          value={updatedDetails.car}
-          onChangeText={(text) => setUpdatedDetails({ ...updatedDetails, car: text })}
-        />
-        <TextInput
-          label="Date"
-          value={updatedDetails.date}
-          onChangeText={(text) => setUpdatedDetails({ ...updatedDetails, date: text })}
-        />
-        <TextInput
-          label="Time"
-          value={updatedDetails.time}
-          onChangeText={(text) => setUpdatedDetails({ ...updatedDetails, time: text })}
-        />
-        <TextInput
-          label="Service Type"
-          value={updatedDetails.bookingType}
-          onChangeText={(text) => setUpdatedDetails({ ...updatedDetails, bookingType: text })}
-        />
-        <TextInput
-          label="Branch"
-          value={updatedDetails.branch}
-          onChangeText={(text) => setUpdatedDetails({ ...updatedDetails, branch: text })}
-        />
-        <TextInput
-          label="Notes"
-          value={updatedDetails.note}
-          onChangeText={(text) => setUpdatedDetails({ ...updatedDetails, note: text })}
-        />
-        <TextInput
-          label="Status"
-          value={updatedDetails.status}
-          onChangeText={(text) => setUpdatedDetails({ ...updatedDetails, status: text })}
-        />
+        {/* Branch dropdown */}
+        <Text style={styles.dropdownLabel}>Branch</Text>
+        <select
+          value={selectedBranch}
+          onChange={(e) => setSelectedBranch(e.target.value)}
+          style={styles.dropdown} // Use the style prop for inline styling
+        >
+          <option value="North">North</option>
+          <option value="Main">Main</option>
+        </select>
+
+        {/* Status dropdown */}
+        <Text style={styles.dropdownLabel}>Status</Text>
+        <select
+          value={selectedStatus}
+          onChange={(e) => setSelectedStatus(e.target.value)}
+          style={styles.dropdown} // Use the style prop for inline styling
+        >
+          <option value="Pending">Pending</option>
+          <option value="Approved">Approved</option>
+          <option value="Rejected">Rejected</option>
+        </select>
+
         <Button mode="contained" onPress={handleSaveChanges} style={styles.saveButton}>
           Save Changes
         </Button>
-        <Button mode="text" onPress={() => setModalVisible(false)} style={styles.cancelButton}>
+        <Button mode="contained" onPress={() => setModalVisible(false)} style={styles.cancelButton}>
           Cancel
         </Button>
       </Modal>
@@ -228,17 +212,31 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   modalContainer: {
-    backgroundColor: "#1E90FF", 
+    backgroundColor: "#fff",
     padding: 20,
     margin: 20,
     borderRadius: 8,
   },
   saveButton: {
-    backgroundColor: "black", 
+    backgroundColor: "#1E90FF",
     marginTop: 10,
   },
   cancelButton: {
     marginTop: 10,
-     backgroundColor: "black"
+    backgroundColor: "black",
+  },
+  dropdownLabel: {
+    fontSize: 16,
+    marginTop: 10,
+    color: "#333",
+  },
+  dropdown: {
+    width: "100%",
+    padding: 10,
+    fontSize: 16,
+    marginBottom: 20,
+    borderRadius: 4,
+    borderColor: "#ccc",
+    borderWidth: 1,
   },
 });
