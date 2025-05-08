@@ -128,7 +128,14 @@ export default function AdminSignUp() {
                 style={styles.input}
                 theme={theme}
               />
-
+              <Button
+                mode="outlined"
+                onPress={() => router.push("/auth/sign-up")}
+                style={styles.signInButton}
+                labelStyle={{ color: "white" }}
+                >
+               register as a Customer
+              </Button>
               <Button
                 mode="contained"
                 onPress={handleAdminRequest}
@@ -138,15 +145,7 @@ export default function AdminSignUp() {
               >
                 {loading ? "Submitting..." : "Submit Request"}
               </Button>
-
-              <Button
-                mode="text"
-                onPress={() => router.push("/auth/sign-up")}
-                style={styles.signInButton}
-              >
-                Want to register as a Customer?{" "}
-                <Text style={styles.signInText}>Go to Sign Up</Text>
-              </Button>
+            
             </View>
           </ScrollView>
         </KeyboardAvoidingView>
@@ -169,10 +168,10 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 5,
   },
-  title: { textAlign: "center", marginBottom: 20, fontWeight: "bold", fontSize: 26, color: "#007bff" },
+  title: { textAlign: "center", marginBottom: 20, fontWeight: "bold", fontSize: 20, color: "white" },
   input: { marginBottom: 15, backgroundColor: "rgba(255, 255, 255, 0.8)" },
   button: { marginTop: 10, backgroundColor: "#007bff", borderRadius: 8 },
   buttonContent: { paddingVertical: 10 },
-  signInButton: { marginTop: 25, alignSelf: "center" },
-  signInText: { color: "#007bff", fontWeight: "bold" },
+  signInButton: { marginTop: 10,borderColor: "#007bff",borderWidth: 1,borderRadius: 8,},
+  signInText: { color: "white", fontWeight: "bold" },
 });

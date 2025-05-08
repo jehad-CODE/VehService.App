@@ -83,7 +83,7 @@ export default function SignInScreen() {
   return (
     <PaperProvider theme={theme}>
       <ImageBackground
-        source={require("@/assets/images/login4.jpg")}
+        source={require("@/assets/images/login6.jpg")}
         style={[styles.background, { width, height }]}
         resizeMode="cover"
       >
@@ -124,7 +124,7 @@ export default function SignInScreen() {
               </Button>
 
               <Button mode="text" onPress={() => router.push("/auth/sign-up")} style={styles.signUpButton}>
-                Don't have an account? <Text style={styles.signUpText}>Sign Up</Text>
+                <Text style={styles.signUpText}>Don't have an account? Sign Up</Text>
               </Button>
             </View>
           </ScrollView>
@@ -148,10 +148,10 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 5,
   },
-  title: { textAlign: "center", marginBottom: 20, fontWeight: "bold", fontSize: 24, color: "#007bff" },
+  title: { textAlign: "center", marginBottom: 20, fontWeight: "bold", fontSize: 24, color: "white" },
   input: { marginBottom: 15, backgroundColor: "rgba(255, 255, 255, 0.8)" },
   button: { marginTop: 10, backgroundColor: "#007bff", borderRadius: 8 },
   buttonContent: { paddingVertical: 10 },
   signUpButton: { marginTop: 10, alignSelf: "center" },
-  signUpText: { color: "#007bff", fontWeight: "bold" },
+  signUpText: { color: "white", fontWeight: "bold" },
 });

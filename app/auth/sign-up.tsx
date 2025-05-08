@@ -52,7 +52,7 @@ export default function SignUpScreen() {
       return;
     }
 
-    const role = "customer"; // Always customer here
+    const role = "customer"; // Default role
 
     setLoading(true);
     try {
@@ -63,14 +63,14 @@ export default function SignUpScreen() {
         role,
       });
 
-      if (response.data.message === "User registered successfully") {
-        Alert.alert("Success", "Account created successfully!");
+      if (response.status === 201) {
+            alert( "Account created successfully!");
         router.push("/auth/sign-in");
       } else {
         Alert.alert("Error", response.data.message || "Registration failed.");
       }
     } catch (error) {
-      Alert.alert("Error", "An unexpected error occurred.");
+            alert( "An unexpected error occurred.");
     } finally {
       setLoading(false);
     }
@@ -79,7 +79,7 @@ export default function SignUpScreen() {
   return (
     <PaperProvider theme={theme}>
       <ImageBackground
-        source={require("@/assets/images/login3.jpg")}
+        source={require("@/assets/images/login2.jpg")}
         style={[styles.background, { width, height }]}
         resizeMode="cover"
       >
@@ -87,7 +87,10 @@ export default function SignUpScreen() {
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           style={styles.container}
         >
-          <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
+          <ScrollView
+            contentContainerStyle={styles.scrollContainer}
+            keyboardShouldPersistTaps="handled"
+          >
             <View style={[styles.innerContainer, { width: width * 0.85 }]}>
               <Text style={styles.title}>Sign Up</Text>
 
@@ -132,14 +135,13 @@ export default function SignUpScreen() {
                 theme={theme}
               />
 
-              {/* Button to register as Admin */}
               <Button
                 mode="outlined"
                 onPress={() => router.push("/auth/admin-sign-up")}
                 style={styles.adminButton}
                 labelStyle={{ color: "#007bff" }}
               >
-              Register as a Garage owner
+                Register as a Garage owner
               </Button>
 
               <Button
@@ -152,8 +154,13 @@ export default function SignUpScreen() {
                 {loading ? "Signing Up..." : "Sign Up"}
               </Button>
 
-              <Button mode="text" onPress={() => router.push("/auth/sign-in")} style={styles.signInButton}>
-                Already have an account? <Text style={styles.signInText}>Sign In</Text>
+              <Button
+                mode="text"
+                onPress={() => router.push("/auth/sign-in")}
+                style={styles.signInButton}
+              >
+
+                <Text style={styles.signInText}>Already have an account? Sign In</Text>
               </Button>
             </View>
           </ScrollView>
@@ -166,9 +173,13 @@ export default function SignUpScreen() {
 const styles = StyleSheet.create({
   background: { flex: 1, justifyContent: "center" },
   container: { flex: 1, justifyContent: "center" },
-  scrollContainer: { flexGrow: 1, justifyContent: "center", paddingHorizontal: 30 },
+  scrollContainer: {
+    flexGrow: 1,
+    justifyContent: "center",
+    paddingHorizontal: 30,
+  },
   innerContainer: {
-    backgroundColor: "rgba(67, 64, 64, 0.35)",
+    backgroundColor: "rgba(33, 33, 33, 0.74)",
     borderRadius: 12,
     padding: 20,
     shadowColor: "#000",
@@ -177,12 +188,33 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 5,
   },
-  title: { textAlign: "center", marginBottom: 20, fontWeight: "bold", fontSize: 26, color: "#007bff" },
-  input: { marginBottom: 15, backgroundColor: "rgba(255, 255, 255, 0.8)" },
-  button: { marginTop: 10, backgroundColor: "#007bff", borderRadius: 8 },
-  buttonContent: { paddingVertical: 10 },
-  signInButton: { marginTop: 10, alignSelf: "center" },
-  signInText: { color: "#007bff", fontWeight: "bold" },
+  title: {
+    textAlign: "center",
+    marginBottom: 20,
+    fontWeight: "bold",
+    fontSize: 26,
+    color: "white",
+  },
+  input: {
+    marginBottom: 15,
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
+  },
+  button: {
+    marginTop: 10,
+    backgroundColor: "#007bff",
+    borderRadius: 8,
+  },
+  buttonContent: {
+    paddingVertical: 10,
+  },
+  signInButton: {
+    marginTop: 10,
+    alignSelf: "center",
+  },
+  signInText: {
+    color: "white",
+    fontWeight: "bold",
+  },
   adminButton: {
     marginTop: 10,
     borderColor: "#007bff",
