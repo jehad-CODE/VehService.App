@@ -202,7 +202,7 @@ export default function AdminRequests() {
                   setSelectedRequest(null);
                 }}
                 style={[styles.modalButton, styles.cancelButton]}
-                labelStyle={{ color: "#6200ee" }}
+                labelStyle={{ color: "#1E90FF" }}
               >
                 Cancel
               </Button>
@@ -280,7 +280,7 @@ const styles = StyleSheet.create({
   },
   pickerContainer: {
     borderWidth: 1.5,
-    borderColor: "#6200ee",
+    borderColor: "#1E90FF",
     borderRadius: 10,
     marginBottom: 16,
   },
@@ -294,9 +294,9 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   confirmButton: {
-    backgroundColor: "#6200ee",
+    backgroundColor: "#1E90FF",
   },
   cancelButton: {
-    borderColor: "#6200ee",
+    borderColor: "#1E90FF",
   },
 });
