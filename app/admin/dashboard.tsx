@@ -1,236 +1,226 @@
 import React from "react";
-import { View, StyleSheet, Text, ImageBackground, Dimensions, ScrollView } from "react-native";
-import { Button, Card, Avatar } from "react-native-paper";
+import { View, StyleSheet, Text, TouchableOpacity, StatusBar, Dimensions } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { LinearGradient } from "expo-linear-gradient";
 
-const { width, height } = Dimensions.get("window");
+// Define TypeScript types
+type Route = 
+  | "/admin/ServiceCenters" 
+  | "/admin/appointments" 
+  | "/admin/inventory" 
+  | "/admin/Technicians" 
+  | "/admin/Billing" 
+  | "/admin/AdminsRequests"
+  | "/(tabs)";
 
-export default function AdminHome() {
+type IconName = 
+  | "office-building" 
+  | "calendar-clock" 
+  | "cube-outline" 
+  | "account-wrench" 
+  | "cash-multiple" 
+  | "clipboard-text-outline"
+  | "logout-variant";
+
+interface MenuItem {
+  title: string;
+  icon: IconName;
+  route: Route;
+}
+
+const { width } = Dimensions.get("window");
+const PRIMARY_COLOR = "#1976d2"; // The blue color
+const SECONDARY_COLOR = "#0d47a1"; // Darker blue for contrast
+const ACCENT_COLOR = "#64b5f6"; // Lighter blue for accents
+const DANGER_COLOR = "#f44336"; // Red color for sign out
+
+export default function AdminHome(): React.ReactElement {
   const router = useRouter();
+  
+  // Menu items configuration
+  const menuItems: MenuItem[] = [
+    { title: "Service Centers", icon: "office-building", route: "/admin/ServiceCenters" },
+    { title: "Appointments", icon: "calendar-clock", route: "/admin/appointments" },
+    { title: "Inventory", icon: "cube-outline", route: "/admin/inventory" },
+    { title: "Technicians", icon: "account-wrench", route: "/admin/Technicians" },
+    { title: "Billing", icon: "cash-multiple", route: "/admin/Billing" },
+    { title: "Owner Requests", icon: "clipboard-text-outline", route: "/admin/AdminsRequests" }
+  ];
 
-  // Sign-out function
+  // Sign out function
   const signOut = () => {
-    // Sign-out logic here (clear tokens, redirect to login screen)
-    router.push("/(tabs)"); // Redirect to tabs
-  };
-
-  // Navigate to other sections
-  const navigateToServiceCenters = () => {
-    router.push("/admin/ServiceCenters");
-  };
-
-  const navigateToAppointments = () => {
-    router.push("/admin/appointments");
-  };
-
-  const navigateToInventory = () => {
-    router.push("/admin/inventory");
-  };
-
-  const navigateToTechnicians = () => {
-    router.push("/admin/Technicians");
-  };
-
-  const navigateToBilling = () => {
-    router.push("/admin/Billing");
-  };
-  const navigateToAdminsReqs= () => {
-    router.push("/admin/AdminsRequests");
+    router.push("/(tabs)" as Route);
   };
 
   return (
-    <ImageBackground
-      source={require("@/assets/images/admin-dashboard.jpg")}
-      style={styles.backgroundImage}
-      resizeMode="cover"
-    >
-      <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>Welcome, Super Admin!</Text>
-
-        <View style={styles.cardContainer}>
-          {/* Service Centers Card */}
-          <Card style={styles.card}>
-            <View style={styles.cardContent}>
-              <Avatar.Icon size={width * 0.1} icon="office-building" style={styles.cardIcon} />
-              <Button
-                mode="contained"
-                onPress={navigateToServiceCenters}
-                style={styles.cardButton}
-                labelStyle={styles.buttonText}
-                contentStyle={styles.buttonContent}
-              >
-                Service Centers
-              </Button>
-            </View>
-          </Card>
-
-          {/* Appointments Card */}
-          <Card style={styles.card}>
-            <View style={styles.cardContent}>
-              <Avatar.Icon size={width * 0.1} icon="calendar" style={styles.cardIcon} />
-              <Button
-                mode="contained"
-                onPress={navigateToAppointments}
-                style={styles.cardButton}
-                labelStyle={styles.buttonText}
-                contentStyle={styles.buttonContent}
-              >
-                Appointments
-              </Button>
-            </View>
-          </Card>
-
-          {/* Inventory Card */}
-          <Card style={styles.card}>
-            <View style={styles.cardContent}>
-              <Avatar.Icon size={width * 0.1} icon="package-variant" style={styles.cardIcon} />
-              <Button
-                mode="contained"
-                onPress={navigateToInventory}
-                style={styles.cardButton}
-                labelStyle={styles.buttonText}
-                contentStyle={styles.buttonContent}
-              >
-                Inventory
-              </Button>
-            </View>
-          </Card>
-
-          {/* Technicians Card */}
-          <Card style={styles.card}>
-            <View style={styles.cardContent}>
-              <Avatar.Icon size={width * 0.1} icon="account-wrench" style={styles.cardIcon} />
-              <Button
-                mode="contained"
-                onPress={navigateToTechnicians}
-                style={styles.cardButton}
-                labelStyle={styles.buttonText}
-                contentStyle={styles.buttonContent}
-              >
-                Technicians
-              </Button>
-            </View>
-          </Card>
-          
-          {/* Billing Card */}
-          <Card style={styles.card}>
-            <View style={styles.cardContent}>
-              <Avatar.Icon size={width * 0.1} icon="cash" style={styles.cardIcon} />
-              <Button
-                mode="contained"
-                onPress={navigateToBilling}
-                style={styles.cardButton}
-                labelStyle={styles.buttonText}
-                contentStyle={styles.buttonContent}
-              >
-                Billing
-              </Button>
-            </View>
-          </Card>
-        {/* Admin Req  */}
-        <Card style={styles.card}>
-            <View style={styles.cardContent}>
-              <Avatar.Icon size={width * 0.1} icon="clipboard-account" style={styles.cardIcon} />
-              <Button
-                mode="contained"
-                onPress={navigateToAdminsReqs}
-                style={styles.cardButton}
-                labelStyle={styles.buttonText}
-                contentStyle={styles.buttonContent}
-              >
-               Owner Requests 
-              </Button>
-            </View>
-          </Card>
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor={PRIMARY_COLOR} />
+      
+      {/* Header with profile section */}
+      <LinearGradient colors={[PRIMARY_COLOR, SECONDARY_COLOR]} style={styles.header}>
+        <View style={styles.profileSection}>
+          <View style={styles.profileCircle}>
+            <Text style={styles.profileInitial}>A</Text>
+          </View>
+          <View style={styles.profileInfo}>
+            <Text style={styles.profileName}>Admin Dashboard</Text>
+            <Text style={styles.profileRole}>Super Administrator</Text>
+          </View>
         </View>
-
-        {/* Sign-Out Button at the Bottom of the Scroll */}
-        <Button
-          mode="contained"
-          onPress={signOut}
-          style={styles.signOutButton} // Apply red button style
-        >
-          Sign Out
-        </Button>
-      </ScrollView>
-    </ImageBackground>
+      </LinearGradient>
+      
+      {/* Card Section */}
+      <View style={styles.cardSection}>
+        <Text style={styles.sectionTitle}>Management Console</Text>
+        
+        <View style={styles.grid}>
+          {menuItems.map((item, index) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.card}
+              activeOpacity={0.7}
+              onPress={() => router.push(item.route)}
+            >
+              <View style={styles.iconContainer}>
+                <MaterialCommunityIcons name={item.icon} size={30} color={PRIMARY_COLOR} />
+              </View>
+              <Text style={styles.cardTitle}>{item.title}</Text>
+              <View style={styles.cardIndicator} />
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+      
+      {/* Sign Out Button - Now Red */}
+      <TouchableOpacity 
+        style={styles.signOutButton}
+        onPress={signOut}
+      >
+        <MaterialCommunityIcons name="logout-variant" size={22} color="white" />
+        <Text style={styles.signOutText}>Sign Out</Text>
+      </TouchableOpacity>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  backgroundImage: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    width: "100%",
-    height: "100%",
-    resizeMode: "cover",
-  },
   container: {
-    justifyContent: "center",
-    alignItems: "center",
+    flex: 1,
+    backgroundColor: "#f5f7fa",
+  },
+  header: {
+    paddingTop: 20,
+    paddingBottom: 30,
     paddingHorizontal: 20,
-    borderRadius: 15,
-    width: "100%",
-    paddingBottom: 40,
-  },
-  title: {
-    fontSize: width * 0.07, // Making the title responsive
-    fontWeight: "bold",
-    color: "#fff",
-    marginBottom: 15,
-    textAlign: "center",
-  },
-  cardContainer: {
-    flexDirection: "column",
-    width: "100%",
-    paddingBottom: 15,
-  },
-  card: {
-    width: width * 0.85,
-    marginVertical: 8,
-    padding: 15,
-    backgroundColor: "rgba(255, 255, 255, 0.3)",
-    borderRadius: 12,
+    borderBottomLeftRadius: 26,
+    borderBottomRightRadius: 26,
     elevation: 4,
-    alignItems: "center",
     shadowColor: "#000",
-    shadowOpacity: 0.25,
-    shadowRadius: 15,
-    shadowOffset: { width: 0, height: 8 },
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
-  cardContent: {
+  profileSection: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    width: "100%",
+    marginTop: 10,
   },
-  cardIcon: {
-    backgroundColor: "#1E88E5",
-    marginRight: 15,
-    padding: 8,
-    borderRadius: 20,
+  profileCircle: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: "white",
+    justifyContent: "center",
+    alignItems: "center",
   },
-  cardButton: {
-    width: width * 0.45,
-    paddingVertical: 10,
-    borderRadius: 18,
-    backgroundColor: "#1E88E5",
-  },
-  buttonText: {
-    fontSize: width * 0.035, 
+  profileInitial: {
+    fontSize: 24,
     fontWeight: "bold",
+    color: PRIMARY_COLOR,
+  },
+  profileInfo: {
+    marginLeft: 15,
+  },
+  profileName: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "white",
+  },
+  profileRole: {
+    fontSize: 14,
+    color: "rgba(255,255,255,0.8)",
+    marginTop: 2,
+  },
+  cardSection: {
+    flex: 1,
+    padding: 20,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#424242",
+    marginBottom: 15,
+  },
+  grid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+  },
+  card: {
+    width: width * 0.43,
+    backgroundColor: "white",
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    alignItems: "center",
+  },
+  iconContainer: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: "rgba(25, 118, 210, 0.1)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  cardTitle: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#424242",
     textAlign: "center",
   },
-  buttonContent: {
-    justifyContent: "center",
+  cardIndicator: {
+    width: 30,
+    height: 3,
+    backgroundColor: PRIMARY_COLOR,
+    marginTop: 12,
+    borderRadius: 2,
   },
   signOutButton: {
-    backgroundColor: "#D32F2F", 
+    backgroundColor: DANGER_COLOR,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 16,
     borderRadius: 12,
-    paddingVertical: 10,
-    width: width * 0.50, 
-    alignSelf: "center",
-    marginTop: 20, 
+    margin: 20,
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
   },
+  signOutText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
+    marginLeft: 8,
+  }
 });

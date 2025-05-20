@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, FlatList, Text, Alert } from "react-native";
-import { Card } from "react-native-paper";
+import { View, StyleSheet, FlatList, Text, ActivityIndicator } from "react-native";
+import { Card, Divider } from "react-native-paper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { LinearGradient } from "expo-linear-gradient";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 interface Service {
   id: string;
@@ -14,60 +16,63 @@ interface Service {
   status: string;
 }
 
+// Ensure icon names are valid
+type IconName = 
+  | "car" 
+  | "calendar"
+  | "calendar-clock" 
+  | "car-wrench"
+  | "note-text"
+  | "history"
+  | "car-off";
+
 export default function ViewHistory() {
-  const [filteredServices, setFilteredServices] = useState<Service[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [services, setServices] = useState<Service[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
-      const email = await AsyncStorage.getItem("userEmail");
-      if (!email) {
-        Alert.alert("Error", "No email found. Please sign in.");
-        return;
-      }
-
-      setLoading(true);
-      setError(null);
-
+    async function fetchServices() {
       try {
+        const email = await AsyncStorage.getItem("userEmail");
+        if (!email) return;
+        
         const response = await fetch(`http://localhost:5000/api/booking/search/${email}`);
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch services");
-        }
-
         const data = await response.json();
-
-        if (data.length === 0) {
-          Alert.alert("No Results", "No service history found for this email.");
-        }
-
-        setFilteredServices(data);
+        setServices(data);
       } catch (err) {
-        console.error("Error fetching data:", err);
-        setError("Error fetching service data");
+        console.error(err);
       } finally {
         setLoading(false);
       }
-    };
-
-    fetchData();
+    }
+    
+    fetchServices();
   }, []);
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#1976d2" />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Service History</Text>
-
-      {loading && <Text style={styles.loadingText}>Loading...</Text>}
-      {error && <Text style={styles.errorText}>{error}</Text>}
-
-      {filteredServices.length === 0 ? (
-        <Text style={styles.noResults}>No results found</Text>
+      <LinearGradient colors={['#1976d2', '#0d47a1']} style={styles.header}>
+        <Text style={styles.title}>Service History</Text>
+      </LinearGradient>
+      
+      {services.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <MaterialCommunityIcons name="history" size={60} color="#ccc" />
+          <Text style={styles.emptyText}>No service history found</Text>
+        </View>
       ) : (
         <FlatList
-          data={filteredServices}
+          data={services}
           keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.listContainer}
           renderItem={({ item }) => {
             const lastServiceDate = new Date(item.date);
             const nextServiceDate = new Date(lastServiceDate);
@@ -77,44 +82,43 @@ export default function ViewHistory() {
             const timeDiff = nextServiceDate.getTime() - today.getTime();
             const daysRemaining = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
             const isDueSoon = daysRemaining <= 7;
-
+            
             return (
               <Card style={styles.card}>
-                <Card.Content>
-                  <View style={styles.serviceDetails}>
-                    <Text style={styles.label}>Username:</Text>
-                    <Text style={styles.value}>{item.customer}</Text>
-
-                    <Text style={styles.label}>Car:</Text>
-                    <Text style={styles.value}>{item.car}</Text>
-
-                    <Text style={styles.label}>Service Type:</Text>
-                    <Text style={styles.value}>{item.bookingType}</Text>
-
-                    {item.note && (
-                      <>
-                        <Text style={styles.label}>Note:</Text>
-                        <Text style={styles.value}>{item.note}</Text>
-                      </>
-                    )}
-
-                    <Text style={styles.label}>Date:</Text>
-                    <Text style={styles.value}>
-                      {lastServiceDate.toLocaleDateString()} at {item.time}
-                    </Text>
-
-                    <Text style={styles.label}>Next Recommended Service:</Text>
-                    <Text
-                      style={[
-                        styles.value,
-                        isDueSoon ? styles.dueSoonText : styles.normalText,
-                      ]}
-                    >
-                      {nextServiceDate.toLocaleDateString()}
-                      {isDueSoon ? " (Due Soon)" : ""}
+                <View style={styles.cardHeader}>
+                  <MaterialCommunityIcons name="car-wrench" size={22} color="#1976d2" />
+                  <Text style={styles.serviceType}>{item.bookingType}</Text>
+                  <View style={styles.carContainer}>
+                    <MaterialCommunityIcons name="car" size={16} color="#757575" />
+                    <Text style={styles.carText}>{item.car}</Text>
+                  </View>
+                </View>
+                
+                <Divider style={styles.divider} />
+                
+                <View style={styles.cardContent}>
+                  <View style={styles.infoRow}>
+                    <MaterialCommunityIcons name="calendar" size={18} color="#757575" />
+                    <Text style={styles.infoText}>
+                      Last service: {lastServiceDate.toLocaleDateString()} at {item.time}
                     </Text>
                   </View>
-                </Card.Content>
+                  
+                  <View style={styles.infoRow}>
+                    <MaterialCommunityIcons name="calendar-clock" size={18} color={isDueSoon ? "#f44336" : "#757575"} />
+                    <Text style={[styles.infoText, isDueSoon ? styles.dueSoonText : {}]}>
+                      Next service: {nextServiceDate.toLocaleDateString()} 
+                      {isDueSoon ? " (Due Soon!)" : ""}
+                    </Text>
+                  </View>
+                  
+                  {item.note && (
+                    <View style={styles.noteContainer}>
+                      <MaterialCommunityIcons name="note-text" size={18} color="#757575" />
+                      <Text style={styles.noteText}>{item.note}</Text>
+                    </View>
+                  )}
+                </View>
               </Card>
             );
           }}
@@ -127,60 +131,102 @@ export default function ViewHistory() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
-    backgroundColor: "#f7f7f7",
+    backgroundColor: "#f5f7fa",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  header: {
+    paddingTop: 40,
+    paddingBottom: 16,
+    alignItems: "center",
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
   },
   title: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: "bold",
-    color: "#333",
-    marginBottom: 20,
+    color: "white",
     textAlign: "center",
+  },
+  listContainer: {
+    padding: 16,
   },
   card: {
     marginBottom: 16,
-    borderRadius: 8,
-    elevation: 3,
-    backgroundColor: "#fff",
-    padding: 12,
+    borderRadius: 12,
+    elevation: 2,
+    backgroundColor: "white",
   },
-  serviceDetails: {
-    flexDirection: "column",
+  cardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 16,
   },
-  label: {
-    fontSize: 14,
+  serviceType: {
+    fontSize: 16,
     fontWeight: "bold",
-    color: "#555",
-    marginTop: 6,
+    marginLeft: 8,
+    flex: 1,
   },
-  value: {
+  carContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f5f5f5",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  carText: {
+    fontSize: 12,
+    color: "#757575",
+    marginLeft: 4,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: "#f0f0f0",
+  },
+  cardContent: {
+    padding: 16,
+  },
+  infoRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  infoText: {
+    marginLeft: 8,
     fontSize: 14,
-    color: "#222",
-    marginBottom: 4,
-  },
-  noResults: {
-    fontSize: 16,
-    color: "#666",
-    textAlign: "center",
-    marginTop: 20,
-  },
-  loadingText: {
-    fontSize: 16,
-    color: "blue",
-    textAlign: "center",
-    marginTop: 20,
-  },
-  errorText: {
-    fontSize: 16,
-    color: "red",
-    textAlign: "center",
-    marginTop: 20,
+    color: "#424242",
   },
   dueSoonText: {
-    color: "red",
+    color: "#f44336",
     fontWeight: "bold",
   },
-  normalText: {
-    color: "#222",
+  noteContainer: {
+    flexDirection: "row",
+    backgroundColor: "#f9f9f9",
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 8,
+  },
+  noteText: {
+    marginLeft: 8,
+    fontSize: 14,
+    color: "#424242",
+    flex: 1,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: "#757575",
+    marginTop: 16,
   },
 });

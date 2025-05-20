@@ -1,16 +1,69 @@
 import React from "react";
-import { View, StyleSheet, Text, ImageBackground, Dimensions, ScrollView } from "react-native";
-import { Button, Card, Avatar } from "react-native-paper";
+import { View, StyleSheet, Text, ImageBackground, Dimensions, ScrollView, TouchableOpacity } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 
-const { width, height } = Dimensions.get("window");
+type Route = 
+  | "/customer/booking"
+  | "/customer/vehicle-history"
+  | "/customer/service-tracking"
+  | "/customer/CustomerProfile"
+  | "/(tabs)";
 
-export default function UserHome() {
+// Properly type the icon names to match the MaterialCommunityIcons set
+type IconName = 
+  | "car-wrench" 
+  | "history" 
+  | "map-marker-check" 
+  | "account-circle"
+  | "chevron-right"
+  | "logout";
+
+interface MenuItem {
+  title: string;
+  subtitle: string;
+  icon: IconName;
+  route: Route;
+}
+
+const { width } = Dimensions.get("window");
+const PRIMARY_COLOR = "#1976d2";
+const DANGER_COLOR = "#D32F2F";
+
+export default function UserHome(): React.ReactElement {
   const router = useRouter();
 
+  const menuItems: MenuItem[] = [
+    {
+      title: "Book a Service",
+      subtitle: "Schedule your vehicle maintenance",
+      icon: "car-wrench",
+      route: "/customer/booking"
+    },
+    {
+      title: "Vehicle History",
+      subtitle: "View your previous services",
+      icon: "history",
+      route: "/customer/vehicle-history"
+    },
+    {
+      title: "Track Service",
+      subtitle: "Monitor your current service",
+      icon: "map-marker-check",
+      route: "/customer/service-tracking"
+    },
+    {
+      title: "My Profile",
+      subtitle: "Manage your account details",
+      icon: "account-circle",
+      route: "/customer/CustomerProfile"
+    }
+  ];
+
   const signOut = () => {
-    // Sign-out logic here (clear tokens, redirect to login screen)
-    router.push("/(tabs)"); // Redirect to tabs (assuming this takes the user to login screen or dashboard)
+    router.push("/(tabs)" as Route);
   };
 
   return (
@@ -19,87 +72,46 @@ export default function UserHome() {
       style={styles.backgroundImage}
       resizeMode="cover"
     >
-      <View style={styles.container}>
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
-          <Text style={styles.title}>Welcome!</Text>
-
-          <View style={styles.cardContainer}>
-            {/* Book a Service Card */}
-            <Card style={styles.card}>
-              <View style={styles.cardContent}>
-                <Avatar.Icon size={width * 0.1} icon="car" style={styles.cardIcon} />
-                <Button
-                  mode="contained"
-                  onPress={() => router.push("/customer/booking")}
-                  style={styles.cardButton}
-                  labelStyle={styles.buttonText}
-                  contentStyle={styles.buttonContent}
-                >
-                  Book Now
-                </Button>
-              </View>
-            </Card>
-
-            {/* Vehicle History Card */}
-            <Card style={styles.card}>
-              <View style={styles.cardContent}>
-                <Avatar.Icon size={width * 0.1} icon="history" style={styles.cardIcon} />
-                <Button
-                  mode="contained"
-                  onPress={() => router.push("/customer/vehicle-history")}
-                  style={styles.cardButton}
-                  labelStyle={styles.buttonText}
-                  contentStyle={styles.buttonContent}
-                >
-                  View History
-                </Button>
-              </View>
-            </Card>
-
-            {/* Track Services Card */}
-            <Card style={styles.card}>
-              <View style={styles.cardContent}>
-                <Avatar.Icon size={width * 0.1} icon="map-marker" style={styles.cardIcon} />
-                <Button
-                  mode="contained"
-                  onPress={() => router.push("/customer/service-tracking")}
-                  style={styles.cardButton}
-                  labelStyle={styles.buttonText}
-                  contentStyle={styles.buttonContent}
-                >
-                  Track Service
-                </Button>
-              </View>
-            </Card>
-
-            {/* Profile Card */}
-            <Card style={styles.card}>
-              <View style={styles.cardContent}>
-                <Avatar.Icon size={width * 0.1} icon="account" style={styles.cardIcon} />
-                <Button
-                  mode="contained"
-                  onPress={() => router.push("/customer/CustomerProfile")}
-                  style={styles.cardButton}
-                  labelStyle={styles.buttonText}
-                  contentStyle={styles.buttonContent}
-                >
-                  My Profile
-                </Button>
-              </View>
-            </Card>
+      <SafeAreaView style={styles.safeArea}>
+        <StatusBar style="light" />
+        
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.welcomeContainer}>
+            <Text style={styles.welcomeText}>Welcome Back</Text>
+            <Text style={styles.nameText}>Vehicle Owner</Text>
           </View>
+        </View>
+        
+        {/* Main Menu */}
+        <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContainer}>
+          {menuItems.map((item, index) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.menuCard}
+              activeOpacity={0.8}
+              onPress={() => router.push(item.route)}
+            >
+              <View style={styles.iconContainer}>
+                <MaterialCommunityIcons name={item.icon} size={28} color="white" />
+              </View>
+              
+              <View style={styles.menuTextContainer}>
+                <Text style={styles.menuTitle}>{item.title}</Text>
+                <Text style={styles.menuSubtitle}>{item.subtitle}</Text>
+              </View>
+              
+              <MaterialCommunityIcons name="chevron-right" size={24} color="white" />
+            </TouchableOpacity>
+          ))}
         </ScrollView>
-
-        {/* Sign-out Button */}
-        <Button
-          mode="contained"
-          onPress={signOut}
-          style={styles.signOutButton}
-          labelStyle={styles.buttonText}
-        >
-          Sign Out
-        </Button>
-      </View>
+        
+        {/* Sign Out Button */}
+        <TouchableOpacity style={styles.signOutButton} onPress={signOut}>
+          <MaterialCommunityIcons name="logout" size={22} color="white" />
+          <Text style={styles.signOutText}>Sign Out</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
     </ImageBackground>
   );
 }
@@ -107,84 +119,91 @@ export default function UserHome() {
 const styles = StyleSheet.create({
   backgroundImage: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
     width: "100%",
     height: "100%",
-    resizeMode: "cover",
   },
-  container: {
+  safeArea: {
     flex: 1,
-    justifyContent: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+  },
+  header: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 20,
+  },
+  welcomeContainer: {
     alignItems: "center",
-    paddingHorizontal: 25,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    borderRadius: 15,
-    width: "100%",
-    paddingBottom: 40,
+  },
+  welcomeText: {
+    fontSize: 16,
+    color: "rgba(255, 255, 255, 0.8)",
+  },
+  nameText: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "white",
+  },
+  scrollView: {
+    flex: 1,
   },
   scrollContainer: {
-    flexGrow: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingBottom: 40,
+    paddingHorizontal: 20,
+    paddingBottom: 90,
+    paddingTop: 20,
   },
-  title: {
-    fontSize: width * 0.07, // Making the title responsive
-    fontWeight: "bold",
-    color: "#fff",
-    marginBottom: 15,
-    textAlign: "center",
-  },
-  signOutButton: {
-    width: "50%",
-    paddingVertical: 10,
-    borderRadius: 18,
-    backgroundColor: "#D32F2F",
-    marginTop: 20,
-  },
-  cardContainer: {
-    flexDirection: "column",
-    width: "100%",
-    paddingBottom: 15,
-  },
-  card: {
-    width: width * 0.85,
-    marginVertical: 8,
-    padding: 15,
-    backgroundColor: "rgba(255, 255, 255, 0.3)",
-    borderRadius: 12,
-    elevation: 4,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOpacity: 0.25,
-    shadowRadius: 15,
-    shadowOffset: { width: 0, height: 8 },
-  },
-  cardContent: {
+  menuCard: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    width: "100%",
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    borderLeftWidth: 3,
+    borderLeftColor: PRIMARY_COLOR,
   },
-  cardIcon: {
-    backgroundColor: "#1E88E5",
-    marginRight: 15,
-    padding: 8,
-    borderRadius: 20,
-  },
-  cardButton: {
-    width: width * 0.45, // Adjusting width to be responsive
-    paddingVertical: 10,
-    borderRadius: 18,
-    backgroundColor: "#1E88E5",
-  },
-  buttonText: {
-    fontSize: width * 0.035, // Adjusting font size based on screen width
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-  buttonContent: {
+  iconContainer: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: PRIMARY_COLOR,
     justifyContent: "center",
+    alignItems: "center",
+    marginRight: 15,
+  },
+  menuTextContainer: {
+    flex: 1,
+  },
+  menuTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "white",
+  },
+  menuSubtitle: {
+    fontSize: 13,
+    color: "rgba(255, 255, 255, 0.7)",
+    marginTop: 3,
+  },
+  signOutButton: {
+    position: "absolute",
+    bottom: 20,
+    left: 20,
+    right: 20,
+    backgroundColor: DANGER_COLOR,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 16,
+    borderRadius: 12,
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+  },
+  signOutText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
+    marginLeft: 8,
   },
 });

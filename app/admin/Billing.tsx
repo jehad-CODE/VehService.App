@@ -1,6 +1,7 @@
 import React from "react";
 import { View, StyleSheet, FlatList } from "react-native";
 import { Button, Card, Text, IconButton } from "react-native-paper";
+import { LinearGradient } from "expo-linear-gradient";
 
 const invoices = [
   { id: "1", invoiceNumber: "INV-001", date: "2023-10-01", amount: "$150.00" },
@@ -10,43 +11,30 @@ const invoices = [
 export default function Billing() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Billing</Text>
+      <LinearGradient colors={['#1976d2', '#0d47a1']} style={styles.header}>
+        <Text style={styles.title}>Billing</Text>
+      </LinearGradient>
 
       <FlatList
         data={invoices}
-        keyExtractor={(item) => item.id}
+        keyExtractor={item => item.id}
+        contentContainerStyle={styles.list}
         renderItem={({ item }) => (
           <Card style={styles.card}>
             <Card.Content>
-              <Text style={styles.invoiceText}>Invoice</Text>
-              <Text style={styles.invoiceDetails}>Number: {item.invoiceNumber}</Text>
-              <Text style={styles.invoiceDetails}>Date: {item.date}</Text>
-              <Text style={styles.invoiceDetails}>Amount: {item.amount}</Text>
+              <Text style={styles.itemTitle}>{item.invoiceNumber}</Text>
+              <Text style={styles.itemDetail}>Date: {item.date}</Text>
+              <Text style={styles.itemDetail}>Amount: {item.amount}</Text>
             </Card.Content>
             <Card.Actions>
-             <IconButton
-              icon="pencil"
-              size={20}
-              onPress={() => console.log("Edit Appointment", item.id)}
-              iconColor="#1E90FF" // Use iconColor instead of color
-              />
-              <IconButton
-              icon="delete"
-              size={20}
-              onPress={() => console.log("Delete Appointment", item.id)}
-              iconColor="red" // Use iconColor instead of color
-              />
+              <IconButton icon="pencil" size={20} iconColor="#1976d2" onPress={() => {}} />
+              <IconButton icon="delete" size={20} iconColor="#f44336" onPress={() => {}} />
             </Card.Actions>
           </Card>
         )}
       />
 
-      <Button
-        mode="contained"
-        style={styles.button}
-        labelStyle={styles.buttonLabel}
-        onPress={() => console.log("Generate New Invoice")}
-      >
+      <Button mode="contained" style={styles.button} icon="receipt">
         Generate Invoice
       </Button>
     </View>
@@ -56,41 +44,45 @@ export default function Billing() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
-    backgroundColor: "#f7f7f7",
+    backgroundColor: "#f5f7fa",
+  },
+  header: {
+    paddingTop: 40,
+    paddingBottom: 16,
+    alignItems: "center",
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
   },
   title: {
-    fontSize: 28,
+    fontSize: 20,
     fontWeight: "bold",
-    marginBottom: 20,
-    color: "#333",
-    textAlign: "center",
+    color: "white",
+  },
+  list: {
+    padding: 16,
+    paddingBottom: 80,
   },
   card: {
-    marginBottom: 16,
+    marginBottom: 12,
     borderRadius: 8,
-    elevation: 3,
-    backgroundColor: "#fff",
-    padding: 10,
+    elevation: 2,
   },
-  invoiceText: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#333",
+  itemTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#424242",
   },
-  invoiceDetails: {
+  itemDetail: {
     fontSize: 14,
-    color: "#666",
+    color: "#757575",
     marginTop: 4,
   },
   button: {
-    marginTop: 20,
+    position: "absolute",
+    bottom: 16,
+    left: 16,
+    right: 16,
+    backgroundColor: "#1976d2",
     borderRadius: 8,
-    backgroundColor: "#1E90FF",
-    paddingVertical: 8,
-  },
-  buttonLabel: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
+  }
 });

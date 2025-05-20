@@ -1,196 +1,172 @@
 import React from "react";
-import { View, StyleSheet, Text, ImageBackground, Dimensions, ScrollView } from "react-native";
-import { Button, Card, Avatar } from "react-native-paper";
+import { View, StyleSheet, Text, Dimensions, TouchableOpacity, StatusBar } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { MaterialCommunityIcons } from "@expo/vector-icons"; // Importing icons
+import { LinearGradient } from "expo-linear-gradient";
 
-const { width, height } = Dimensions.get("window");
+// Define TypeScript types
+type Route = 
+  | "/admin/ServiceCenters" 
+  | "/adminC/NorthBranchAppointments" 
+  | "/admin/Billing"
+  | "/(tabs)";
 
-export default function AdminHome() {
+const { width } = Dimensions.get("window");
+const PRIMARY_COLOR = "#1976d2"; 
+const SECONDARY_COLOR = "#0d47a1";
+const DANGER_COLOR = "#f44336";
+
+export default function AdminCHome(): React.ReactElement {
   const router = useRouter();
-
-  // Sign-out function
-  const signOut = () => {
-    // Sign-out logic here (clear tokens, redirect to login screen)
-    router.push("/(tabs)"); // Redirect to tabs
-  };
-
+  
   // Navigate to other sections
   const navigateToServiceCenters = () => {
-    router.push("/admin/ServiceCenters");
+    router.push("/admin/ServiceCenters" as Route);
   };
 
   const navigateToAppointments = () => {
-    router.push("/adminC/NorthBranchAppointments");
-  };
-
-  const navigateToInventory = () => {
-    router.push("/admin/inventory");
-  };
-
-  const navigateToTechnicians = () => {
-    router.push("/admin/Technicians");
+    router.push("/adminC/NorthBranchAppointments" as Route);
   };
 
   const navigateToBilling = () => {
-    router.push("/admin/Billing");
+    router.push("/admin/Billing" as Route);
+  };
+
+  // Sign-out function
+  const signOut = () => {
+    router.push("/(tabs)" as Route);
   };
 
   return (
-    <ImageBackground
-      source={require("@/assets/images/adminB-dashboardC.jpg")}
-      style={styles.backgroundImage}
-      resizeMode="cover"
-    >
-      <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>Welcome, AdminC!</Text>
-
-        <View style={styles.cardContainer}>
-          {/* Service Centers Card */}
-          <Card style={styles.card}>
-            <View style={styles.cardContent}>
-              <Avatar.Icon size={width * 0.1} icon="office-building" style={styles.cardIcon} />
-              <Button
-                mode="contained"
-                onPress={navigateToServiceCenters}
-                style={styles.cardButton}
-                labelStyle={styles.buttonText}
-                contentStyle={styles.buttonContent}
-              >
-                Service Centers
-              </Button>
-            </View>
-          </Card>
-
-          {/* Appointments Card */}
-          <Card style={styles.card}>
-            <View style={styles.cardContent}>
-              <Avatar.Icon size={width * 0.1} icon="calendar" style={styles.cardIcon} />
-              <Button
-                mode="contained"
-                onPress={navigateToAppointments}
-                style={styles.cardButton}
-                labelStyle={styles.buttonText}
-                contentStyle={styles.buttonContent}
-              >
-                Appointments
-              </Button>
-            </View>
-          </Card>
-
-          {/* Billing Card */}
-          <Card style={styles.card}>
-            <View style={styles.cardContent}>
-              <Avatar.Icon size={width * 0.1} icon="cash" style={styles.cardIcon} />
-              <Button
-                mode="contained"
-                onPress={navigateToBilling}
-                style={styles.cardButton}
-                labelStyle={styles.buttonText}
-                contentStyle={styles.buttonContent}
-              >
-                Billing
-              </Button>
-            </View>
-          </Card>
-        </View>
-      </ScrollView>
-
-      <View style={styles.fabContainer}>
-        <Button
-          mode="contained"
-          onPress={signOut}
-          style={styles.fabButton}
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content" />
+      
+      {/* Header with gradient */}
+      <LinearGradient colors={[PRIMARY_COLOR, SECONDARY_COLOR]} style={styles.header}>
+        <Text style={styles.adminTitle}>Admin C Dashboard</Text>
+      </LinearGradient>
+      
+      {/* Menu Items */}
+      <View style={styles.menuContainer}>
+        {/* Service Centers Card */}
+        <TouchableOpacity
+          style={styles.menuCard}
+          onPress={navigateToServiceCenters}
+          activeOpacity={0.8}
         >
-          <MaterialCommunityIcons name="exit-to-app" size={30} color="white" />
-        </Button>
+          <View style={styles.menuIconContainer}>
+            <MaterialCommunityIcons name="office-building" size={34} color="white" />
+          </View>
+          <Text style={styles.menuTitle}>Service Centers</Text>
+        </TouchableOpacity>
+
+        {/* Appointments Card */}
+        <TouchableOpacity
+          style={styles.menuCard}
+          onPress={navigateToAppointments}
+          activeOpacity={0.8}
+        >
+          <View style={styles.menuIconContainer}>
+            <MaterialCommunityIcons name="calendar-check" size={34} color="white" />
+          </View>
+          <Text style={styles.menuTitle}>Appointments</Text>
+        </TouchableOpacity>
+
+        {/* Billing Card */}
+        <TouchableOpacity
+          style={styles.menuCard}
+          onPress={navigateToBilling}
+          activeOpacity={0.8}
+        >
+          <View style={styles.menuIconContainer}>
+            <MaterialCommunityIcons name="cash-multiple" size={34} color="white" />
+          </View>
+          <Text style={styles.menuTitle}>Billing</Text>
+        </TouchableOpacity>
       </View>
-    </ImageBackground>
+      
+      {/* Sign Out Button */}
+      <TouchableOpacity style={styles.signOutButton} onPress={signOut}>
+        <MaterialCommunityIcons name="logout-variant" size={24} color="white" />
+        <Text style={styles.signOutText}>Sign Out</Text>
+      </TouchableOpacity>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  backgroundImage: {
+  container: {
+    flex: 1,
+    backgroundColor: "#f5f7fa",
+  },
+  header: {
+    paddingVertical: 24,
+    paddingHorizontal: 20,
+    borderBottomLeftRadius: 26,
+    borderBottomRightRadius: 26,
+    alignItems: "center",
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  adminTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "white",
+  },
+  menuContainer: {
+    padding: 20,
     flex: 1,
     justifyContent: "center",
-    alignItems: "center",
-    width: "100%",
-    height: "100%",
-    resizeMode: "cover",
   },
-  container: {
-    justifyContent: "flex-start", // Align content from the top
-    alignItems: "center",
-    paddingHorizontal: 20,
-    width: "100%",
-    paddingBottom: 40,
-  },
-  title: {
-    fontSize: width * 0.07,
-    fontWeight: "bold",
-    color: "black",
-    marginBottom: 15,
-    textAlign: "center",
-  },
-  cardContainer: {
-    flexDirection: "column",
-    width: "100%",
-    paddingBottom: 15,
-    height: height * 0.5, // Adjust height to take half of the screen
-    justifyContent: "flex-start", // Ensure the cards are placed at the top of the container
-    marginTop: height * 0.1, // Add margin-top to move the cards down a bit
-  },
-  card: {
-    width: width * 0.85,
-    marginVertical: 8,
-    padding: 15,
-    backgroundColor: "rgba(0, 0, 0, 0.68)",
+  menuCard: {
+    backgroundColor: PRIMARY_COLOR,
     borderRadius: 12,
-    elevation: 4,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOpacity: 0.25,
-    shadowRadius: 15,
-    shadowOffset: { width: 0, height: 8 },
-  },
-  cardContent: {
+    padding: 20,
+    marginBottom: 20,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    width: "100%",
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
   },
-  cardIcon: {
-    backgroundColor: "#1E88E5",
-    marginRight: 15,
-    padding: 8,
-    borderRadius: 20,
-  },
-  cardButton: {
-    width: width * 0.45,
-    paddingVertical: 10,
-    borderRadius: 18,
-    backgroundColor: "#1E88E5",
-  },
-  buttonText: {
-    fontSize: width * 0.035,
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-  buttonContent: {
-    justifyContent: "center",
-  },
-  fabContainer: {
-    position: "absolute",
-    bottom: 30,
-    right: 20,
-    zIndex: 1,
-  },
-  fabButton: {
-    backgroundColor: "#D32F2F",
-    borderRadius: 50,
+  menuIconContainer: {
     width: 60,
     height: 60,
+    borderRadius: 30,
+    backgroundColor: "rgba(255,255,255,0.2)",
     justifyContent: "center",
     alignItems: "center",
+    marginRight: 20,
   },
+  menuTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "white",
+  },
+  signOutButton: {
+    backgroundColor: DANGER_COLOR,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 16,
+    borderRadius: 12,
+    margin: 20,
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  },
+  signOutText: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 16,
+    marginLeft: 8,
+  }
 });

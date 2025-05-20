@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, FlatList, TextInput, Button, Text, Alert } from "react-native";
-import { Card } from "react-native-paper";
-import AsyncStorage from "@react-native-async-storage/async-storage"; // Import AsyncStorage
+import { View, StyleSheet, FlatList, Text, ActivityIndicator } from "react-native";
+import { Card, Divider } from "react-native-paper";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { LinearGradient } from "expo-linear-gradient";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
-// Define the Type for serviceTracking data
 interface Service {
   id: string;
   customer: string;
@@ -12,110 +13,130 @@ interface Service {
   date: string;
   time: string;
   note?: string;
-  status: string; // New field for status
+  status: string;
+}
+
+// Define a type for valid icon names
+type IconName = 
+  | "car-wrench" 
+  | "clock-outline"
+  | "progress-wrench" 
+  | "check-circle"
+  | "close-circle"
+  | "help-circle"
+  | "car"
+  | "calendar"
+  | "note-text"
+  | "car-off";
+
+interface StatusInfo {
+  color: string;
+  icon: IconName;
 }
 
 export default function TrackService() {
-  const [filteredServices, setFilteredServices] = useState<Service[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [services, setServices] = useState<Service[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
-      const email = await AsyncStorage.getItem("userEmail"); // Get email from AsyncStorage
-      if (!email) {
-        Alert.alert("Error", "No email found. Please sign in.");
-        return;
-      }
-
-      setLoading(true);
-      setError(null);
-
+    async function fetchServices() {
       try {
-        const response = await fetch(`http://localhost:5000/api/booking/search/${email}`); // Use email to fetch data
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch services");
-        }
-
+        const email = await AsyncStorage.getItem("userEmail");
+        if (!email) return;
+        
+        const response = await fetch(`http://localhost:5000/api/booking/search/${email}`);
         const data = await response.json();
-
-        if (data.length === 0) {
-          Alert.alert("No Results", "No service history found for this email.");
-        }
-
-        setFilteredServices(data);
+        setServices(data);
       } catch (err) {
-        console.error("Error fetching data:", err);
-        setError("Error fetching service data");
+        console.error(err);
       } finally {
         setLoading(false);
       }
-    };
-
-    fetchData();
+    }
+    
+    fetchServices();
   }, []);
 
-  // Function to get status color
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "pending":
-        return "#FFA500"; // Orange
-      case "in progress":
-        return "#1E90FF"; // Blue
-      case "approved":
-        return "#008000"; // Green
-      case "cancelled":
-        return "#FF0000"; // Red
-      default:
-        return "#000"; // Black (default)
+  // Get status icon and color
+  const getStatusInfo = (status: string): StatusInfo => {
+    const statusLower = status.toLowerCase();
+    
+    if (statusLower === "pending") {
+      return { color: "#ff9800", icon: "clock-outline" };
+    } else if (statusLower === "in progress") {
+      return { color: "#2196f3", icon: "progress-wrench" };
+    } else if (statusLower === "approved") {
+      return { color: "#4caf50", icon: "check-circle" };
+    } else if (statusLower === "cancelled") {
+      return { color: "#f44336", icon: "close-circle" };
+    } else {
+      return { color: "#757575", icon: "help-circle" };
     }
   };
 
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#1976d2" />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Track Your Services</Text>
-
-      {loading && <Text style={styles.loadingText}>Loading...</Text>}
-      {error && <Text style={styles.errorText}>{error}</Text>}
-
-      {filteredServices.length === 0 ? (
-        <Text style={styles.noResults}>No results found</Text>
+      <LinearGradient colors={['#1976d2', '#0d47a1']} style={styles.header}>
+        <Text style={styles.title}>Service Tracking</Text>
+      </LinearGradient>
+      
+      {services.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <MaterialCommunityIcons name="car-off" size={60} color="#ccc" />
+          <Text style={styles.emptyText}>No service records found</Text>
+        </View>
       ) : (
         <FlatList
-          data={filteredServices}
+          data={services}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <Card style={styles.card}>
-              <Card.Content>
-                <View style={styles.serviceDetails}>
-                  <Text style={styles.label}>Username:</Text>
-                  <Text style={styles.value}>{item.customer}</Text>
-
-                  <Text style={styles.label}>Car:</Text>
-                  <Text style={styles.value}>{item.car}</Text>
-
-                  <Text style={styles.label}>Service Type:</Text>
-                  <Text style={styles.value}>{item.bookingType}</Text>
-
-                  {item.note && (
-                    <>
-                      <Text style={styles.label}>Note:</Text>
-                      <Text style={styles.value}>{item.note}</Text>
-                    </>
-                  )}
-
-                  <Text style={styles.label}>Date:</Text>
-                  <Text style={styles.value}>
-                    {new Date(item.date).toLocaleDateString()} at {item.time}
-                  </Text>
-
-                  <Text style={styles.label}>Status:</Text>
-                  <Text style={[styles.status, { color: getStatusColor(item.status) }]}>{item.status}</Text>
+          contentContainerStyle={styles.listContainer}
+          renderItem={({ item }) => {
+            const { color, icon } = getStatusInfo(item.status);
+            
+            return (
+              <Card style={styles.card}>
+                <View style={styles.cardHeader}>
+                  <MaterialCommunityIcons name="car-wrench" size={22} color="#1976d2" />
+                  <Text style={styles.serviceType}>{item.bookingType}</Text>
+                  <View style={[styles.statusBadge, { backgroundColor: color }]}>
+                    <MaterialCommunityIcons name={icon} size={12} color="white" />
+                    <Text style={styles.statusText}>{item.status}</Text>
+                  </View>
                 </View>
-              </Card.Content>
-            </Card>
-          )}
+                
+                <Divider style={styles.divider} />
+                
+                <View style={styles.cardContent}>
+                  <View style={styles.infoRow}>
+                    <MaterialCommunityIcons name="car" size={18} color="#757575" />
+                    <Text style={styles.infoText}>{item.car}</Text>
+                  </View>
+                  
+                  <View style={styles.infoRow}>
+                    <MaterialCommunityIcons name="calendar" size={18} color="#757575" />
+                    <Text style={styles.infoText}>
+                      {new Date(item.date).toLocaleDateString()} at {item.time}
+                    </Text>
+                  </View>
+                  
+                  {item.note && (
+                    <View style={styles.noteContainer}>
+                      <MaterialCommunityIcons name="note-text" size={18} color="#757575" />
+                      <Text style={styles.noteText}>{item.note}</Text>
+                    </View>
+                  )}
+                </View>
+              </Card>
+            );
+          }}
         />
       )}
     </View>
@@ -125,57 +146,98 @@ export default function TrackService() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
-    backgroundColor: "#f7f7f7",
+    backgroundColor: "#f5f7fa",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  header: {
+    paddingTop: 40,
+    paddingBottom: 16,
+    alignItems: "center",
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
   },
   title: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: "bold",
-    color: "#333",
-    marginBottom: 20,
+    color: "white",
     textAlign: "center",
+  },
+  listContainer: {
+    padding: 16,
   },
   card: {
     marginBottom: 16,
-    borderRadius: 8,
-    elevation: 3,
-    backgroundColor: "#fff",
+    borderRadius: 12,
+    elevation: 2,
+    backgroundColor: "white",
+  },
+  cardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 16,
+  },
+  serviceType: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginLeft: 8,
+    flex: 1,
+  },
+  statusBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 16,
+  },
+  statusText: {
+    color: "white",
+    fontSize: 12,
+    fontWeight: "bold",
+    marginLeft: 4,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: "#f0f0f0",
+  },
+  cardContent: {
+    padding: 16,
+  },
+  infoRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  infoText: {
+    marginLeft: 8,
+    fontSize: 14,
+    color: "#424242",
+  },
+  noteContainer: {
+    flexDirection: "row",
+    backgroundColor: "#f9f9f9",
     padding: 12,
+    borderRadius: 8,
+    marginTop: 8,
   },
-  serviceDetails: {
-    flexDirection: "column",
-  },
-  label: {
+  noteText: {
+    marginLeft: 8,
     fontSize: 14,
-    fontWeight: "bold",
-    color: "#555",
-    marginTop: 6,
+    color: "#424242",
+    flex: 1,
   },
-  value: {
-    fontSize: 14,
-    color: "#222",
-    marginBottom: 4,
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
   },
-  status: {
-    fontSize: 14,
-    fontWeight: "bold",
-  },
-  noResults: {
+  emptyText: {
     fontSize: 16,
-    color: "#666",
-    textAlign: "center",
-    marginTop: 20,
-  },
-  loadingText: {
-    fontSize: 16,
-    color: "blue",
-    textAlign: "center",
-    marginTop: 20,
-  },
-  errorText: {
-    fontSize: 16,
-    color: "red",
-    textAlign: "center",
-    marginTop: 20,
+    color: "#757575",
+    marginTop: 16,
   },
 });

@@ -1,6 +1,7 @@
 import React from "react";
 import { View, StyleSheet, FlatList } from "react-native";
 import { Button, Card, Text, IconButton } from "react-native-paper";
+import { LinearGradient } from "expo-linear-gradient";
 
 const inventoryItems = [
   { id: "1", name: "Oil Filter", quantity: 20 },
@@ -11,42 +12,29 @@ const inventoryItems = [
 export default function InventoryScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Inventory Management</Text>
+      <LinearGradient colors={['#1976d2', '#0d47a1']} style={styles.header}>
+        <Text style={styles.title}>Inventory</Text>
+      </LinearGradient>
 
       <FlatList
         data={inventoryItems}
-        keyExtractor={(item) => item.id}
+        keyExtractor={item => item.id}
+        contentContainerStyle={styles.list}
         renderItem={({ item }) => (
           <Card style={styles.card}>
             <Card.Content>
-              <Text style={styles.itemName}>{item.name}</Text>
-              <Text style={styles.itemDetails}>Quantity: {item.quantity}</Text>
+              <Text style={styles.itemTitle}>{item.name}</Text>
+              <Text style={styles.itemDetail}>Quantity: {item.quantity}</Text>
             </Card.Content>
             <Card.Actions>
-              <IconButton
-                icon="pencil"
-                size={20}
-                onPress={() => console.log("Edit Item", item.id)}
-                iconColor="#1E90FF"
-              />
-              <IconButton
-                icon="delete"
-                size={20}
-                onPress={() => console.log("Delete Item", item.id)}
-                iconColor="red"
-
-              />
+              <IconButton icon="pencil" size={20} iconColor="#1976d2" onPress={() => {}} />
+              <IconButton icon="delete" size={20} iconColor="#f44336" onPress={() => {}} />
             </Card.Actions>
           </Card>
         )}
       />
 
-      <Button
-        mode="contained"
-        style={styles.button}
-        labelStyle={styles.buttonLabel}
-        onPress={() => console.log("Add New Item")}
-      >
+      <Button mode="contained" style={styles.button} icon="plus">
         Add Item
       </Button>
     </View>
@@ -56,41 +44,45 @@ export default function InventoryScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
-    backgroundColor: "#f7f7f7",
+    backgroundColor: "#f5f7fa",
+  },
+  header: {
+    paddingTop: 40,
+    paddingBottom: 16,
+    alignItems: "center",
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
   },
   title: {
-    fontSize: 28,
+    fontSize: 20,
     fontWeight: "bold",
-    marginBottom: 20,
-    color: "#333",
-    textAlign: "center",
+    color: "white",
+  },
+  list: {
+    padding: 16,
+    paddingBottom: 80,
   },
   card: {
-    marginBottom: 16,
+    marginBottom: 12,
     borderRadius: 8,
-    elevation: 3,
-    backgroundColor: "#fff",
-    padding: 10,
+    elevation: 2,
   },
-  itemName: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#333",
+  itemTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#424242",
   },
-  itemDetails: {
+  itemDetail: {
     fontSize: 14,
-    color: "#666",
+    color: "#757575",
     marginTop: 4,
   },
   button: {
-    marginTop: 20,
+    position: "absolute",
+    bottom: 16,
+    left: 16,
+    right: 16,
+    backgroundColor: "#1976d2",
     borderRadius: 8,
-    backgroundColor: "#1E90FF",
-    paddingVertical: 8,
-  },
-  buttonLabel: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
+  }
 });

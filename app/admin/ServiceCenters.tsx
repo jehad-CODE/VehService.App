@@ -1,6 +1,7 @@
 import React from "react";
 import { View, StyleSheet, FlatList } from "react-native";
 import { Button, Card, Text, IconButton } from "react-native-paper";
+import { LinearGradient } from "expo-linear-gradient";
 
 const serviceCenters = [
   { id: "1", name: "Center 1", address: "Girne, Karakum, Branch1" },
@@ -10,47 +11,30 @@ const serviceCenters = [
 export default function ServiceCenters() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Service Centers</Text>
+      <LinearGradient colors={['#1976d2', '#0d47a1']} style={styles.header}>
+        <Text style={styles.title}>Service Centers</Text>
+      </LinearGradient>
 
       <FlatList
         data={serviceCenters}
-        keyExtractor={(item) => item.id}
+        keyExtractor={item => item.id}
+        contentContainerStyle={styles.list}
         renderItem={({ item }) => (
           <Card style={styles.card}>
             <Card.Content>
-              <Text style={styles.centerName}>{item.name}</Text>
-              <Text style={styles.centerAddress}>{item.address}</Text>
+              <Text style={styles.itemTitle}>{item.name}</Text>
+              <Text style={styles.itemDetail}>{item.address}</Text>
             </Card.Content>
             <Card.Actions>
-              <IconButton
-                icon="pencil"
-                size={20}
-                onPress={() => console.log("Edit Center", item.id)}
-                iconColor="#1E90FF"
-              />
-              <IconButton
-                icon="delete"
-                size={20}
-                onPress={() => console.log("Delete Center", item.id)}
-                iconColor="red"
-              />
-              <IconButton
-                icon="map-marker"
-                size={20}
-                onPress={() => console.log("View on Map", item.id)}
-                iconColor="green"
-              />
+              <IconButton icon="pencil" size={20} iconColor="#1976d2" onPress={() => {}} />
+              <IconButton icon="delete" size={20} iconColor="#f44336" onPress={() => {}} />
+              <IconButton icon="map-marker" size={20} iconColor="#4caf50" onPress={() => {}} />
             </Card.Actions>
           </Card>
         )}
       />
 
-      <Button
-        mode="contained"
-        style={styles.button}
-        labelStyle={styles.buttonLabel}
-        onPress={() => console.log("Add Center Pressed")}
-      >
+      <Button mode="contained" style={styles.button} icon="plus">
         Add Center
       </Button>
     </View>
@@ -60,42 +44,45 @@ export default function ServiceCenters() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
-    backgroundColor: "#f7f7f7",
+    backgroundColor: "#f5f7fa",
+  },
+  header: {
+    paddingTop: 40,
+    paddingBottom: 16,
+    alignItems: "center",
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
   },
   title: {
-    fontSize: 28,
+    fontSize: 20,
     fontWeight: "bold",
-    marginBottom: 20,
-    color: "#333",
-    textAlign: "center",
+    color: "white",
+  },
+  list: {
+    padding: 16,
+    paddingBottom: 80,
   },
   card: {
-    marginBottom: 16,
+    marginBottom: 12,
     borderRadius: 8,
-    elevation: 3,
-    backgroundColor: "#fff",
-    padding: 10,
+    elevation: 2,
   },
-  centerName: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#333",
-  },
-  centerAddress: {
-    fontSize: 14,
-    color: "#666",
-    marginTop: 4,
-  },                
-
-  button: {
-    marginTop: 20,
-    borderRadius: 8,
-    backgroundColor: "#1E90FF",
-    paddingVertical: 8,
-  },
-  buttonLabel: {
-    color: "#fff",
+  itemTitle: {
+    fontSize: 16,
     fontWeight: "bold",
+    color: "#424242",
   },
+  itemDetail: {
+    fontSize: 14,
+    color: "#757575",
+    marginTop: 4,
+  },
+  button: {
+    position: "absolute",
+    bottom: 16,
+    left: 16,
+    right: 16,
+    backgroundColor: "#1976d2",
+    borderRadius: 8,
+  }
 });
